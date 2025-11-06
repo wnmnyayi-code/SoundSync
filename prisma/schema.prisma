@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL") // Vercel will auto-populate this
+}
+
+enum Role {
+  FAN
+  CREATOR
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum StoreType {
+  NONE
+  RENTED
+  PERMANENT
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  role              Role     @default(FAN)
+  artistName        String?
+  phone             String?
+  coinBalance       Int      @default(0)
+  verificationStatus VerificationStatus @default(PENDING)
+  
+  // Creator-specific
+  storeType         StoreType @default(NONE)
+  storeRentExpiry   DateTime?
+  totalPlaylists    Int       @default(1)
+  
+  // Relations
+  tracks            Track[]
+  playlists         Playlist[]
+  sessions          Session[]
+  rsvps             RSVP[]
+  merchandise       Merchandise[]
+  
+  createdAt         DateTime @default(now())
+}
+
+model Track {
+  id                String   @id @default(cuid())
+  filename          String
+  originalName      String
+  duration          Int // in seconds
+  creatorId         String
+  creator           User     @relation(fields: [creatorId], references: [id])
+  playlistId        String?
+  playlist          Playlist? @relation(fields: [playlistId], references: [id])
+  verified          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime @default(now().add("24 hours"))
+}
+
+model Playlist {
+  id                String   @id @default(cuid())
+  name              String   @default("My Playlist")
+  creatorId         String
+  creator           User     @relation(fields: [creatorId], references: [id])
+  tracks            Track[]
+  maxTracks         Int      @default(10)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+}
+
+model Session {
+  id                String   @id @default(cuid())
+  creatorId         String
+  creator           User     @relation(fields: [creatorId], references: [id])
+  scheduledAt       DateTime
+  rsvpPriceCoins    Int      @default(0)
+  maxAttendees      Int      @default(100)
+  status            String   @default("SCHEDULED") // SCHEDULED, LIVE, ENDED, CANCELLED
+  streamUrl         String?  // Temporary URL
+  attendees         Int      @default(0)
+  rsvps             RSVP[]
+  createdAt         DateTime @default(now())
+}
+
+model RSVP {
+  id                String   @id @default(cuid())
+  sessionId         String
+  session           Session  @relation(fields: [sessionId], references: [id])
+  fanId             String
+  fan               User     @relation(fields: [fanId], references: [id])
+  amountPaid        Int      // in coins
+  vatAmount         Float    @default(0)
+  platformFee       Float    @default(0)
+  refunded          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+}
+
+model Merchandise {
+  id                String   @id @default(cuid())
+  creatorId         String
+  creator           User     @relation(fields: [creatorId], references: [id])
+  title             String
+  description       String?
+  price             Float    // in ZAR
+  type              String   // "physical" or "digital"
+  fileUrl           String?  // for digital items
+  imageUrl          String?
+  sold              Int      @default(0)
+  createdAt         DateTime @default(now())
+}
+
+model CoinTransaction {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  type              String   // "PURCHASE", "TIP", "RSVP", "REFUND"
+  amount            Int      // coin amount
+  zarAmount         Float?   // ZAR equivalent
+  vatAmount         Float    @default(0)
+  relatedId         String?  // sessionId or merchId
+  createdAt         DateTime @default(now())
+}
