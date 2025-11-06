@@ -1,0 +1,18 @@
+{
+  "Rules": [
+    {
+      "ID": "Delete temp tracks after 24h",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "temp-streams/" },
+      "Expiration": { "Days": 1 },
+      "NoncurrentVersionExpiration": { "NoncurrentDays": 1 }
+    },
+    {
+      "ID": "Delete session recordings after 5min",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "sessions/" },
+      "Expiration": { "Days": 1/288 }, // 5 minutes
+      "NoncurrentVersionExpiration": { "NoncurrentDays": 1 }
+    }
+  ]
+}

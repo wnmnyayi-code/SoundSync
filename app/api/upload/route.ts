@@ -1,9 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { writeFile, unlink } from 'fs/promises'
-import { join } from 'path'
 import prisma from '@/lib/prisma'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+
+const s3 = new S3Client({
+  region: 'af-south-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session || session.user.role !== 'CREATOR') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const formData = await req.formData()
+    const file = formData.get('track') as File
+    
+    // Generate unique key (auto-deleted by lifecycle policy)
+    const key = `temp-streams/${session.user.id}/${Date.now()}-${file.name}`
+    
+    // Create S3 command
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Key: key,
+      ContentType: file.type,
+      Metadata: {
+        'creator-id': session.user.id,
+        'original-name': file.name,
+        'upload-timestamp': Date.now().toString(),
+      },
+    })
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import prisma from '@/lib/prisma'
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || 'af-south-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -17,46 +65,36 @@ export async function POST(req: NextRequest) {
     const file = formData.get('track') as File
     
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Verify file type
-    if (!file.type.startsWith('audio/')) {
-      return NextResponse.json({ error: 'Must be audio file' }, { status: 400 })
-    }
-
-    // Save file temporarily
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const filename = `${session.user.id}-${Date.now()}-${file.name}`
-    const path = join(process.cwd(), 'public/uploads', filename)
+    // Generate unique key (auto-deleted by S3 lifecycle policy after 24h)
+    const key = `temp-streams/${session.user.id}/${Date.now()}-${file.name}`
     
-    await writeFile(path, buffer)
-
-    // Create track record (auto-expires in 24h)
-    const track = await prisma.track.create({
-      data: {
-        filename,
-        originalName: file.name,
-        duration: 0, // Would extract from metadata
-        creatorId: session.user.id,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-      }
+    // Create S3 command
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Key: key,
+      ContentType: file.type,
+      Metadata: {
+        'creator-id': session.user.id,
+        'original-name': file.name,
+        'verified': 'false', // Admin will verify
+      },
     })
 
-    // Auto-delete after 24 hours (simulated)
-    setTimeout(async () => {
-      try {
-        await unlink(path)
-        await prisma.track.delete({ where: { id: track.id } })
-      } catch (e) {
-        console.log('Auto-delete failed:', e)
-      }
-    }, 24 * 60 * 60 * 1000)
+    // Generate presigned URL (valid for 5 minutes)
+    const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 })
 
-    return NextResponse.json({ success: true, track })
+    return NextResponse.json({ 
+      success: true, 
+      uploadUrl,
+      key,
+      instructions: "Use this URL to upload directly from client"
+    })
+
   } catch (error) {
-    console.error(error)
+    console.error('S3 error:', error)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
   }
 }
