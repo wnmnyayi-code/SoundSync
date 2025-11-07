@@ -200,11 +200,7 @@ export default function RegisterPage() {
                   {errors.email}
                 </p>
               )}
-              {errors.email && (
-                <p id="email-error" className="text-destructive text-sm mt-1" role="alert">
-                  {errors.email}
-                </p>
-              )}
+              
             </div>
 
             <div>
