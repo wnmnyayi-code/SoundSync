@@ -1,16 +1,73 @@
 'use client'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Music, Users, Coins, Store } from 'lucide-react'
 import Link from 'next/link'
+import { Spinner } from '@/components/ui/spinner'
 
 export default function CreatorDashboard() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState<any>(null)
+  const [playlists, setPlaylists] = useState<any[]>([])
+  const [upcomingSession, setUpcomingSession] = useState<any>(null)
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, playlistsRes, sessionRes] = await Promise.all([
+          fetch('/api/creator/stats'),
+          fetch('/api/creator/playlists'),
+          fetch('/api/creator/upcoming-session')
+        ])
+
+        if (!statsRes.ok || !playlistsRes.ok || !sessionRes.ok) {
+          throw new Error('Failed to fetch creator data')
+        }
+
+        const [statsData, playlistsData, sessionData] = await Promise.all([
+          statsRes.json(),
+          playlistsRes.json(),
+          sessionRes.json()
+        ])
+
+        setStats(statsData)
+        setPlaylists(playlistsData)
+        setUpcomingSession(sessionData)
+        setIsLoading(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard')
+        setIsLoading(false)
+      }
+    }
+
+    if (session?.user.role === 'CREATOR') {
+      fetchData()
+    }
+  }, [session])
+  
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center">
+      <Spinner />
+    </div>
+  }
   
   if (!session || session.user.role !== 'CREATOR') {
     redirect('/login')
+  }
+
+  if (error) {
+    return <div className="min-h-screen p-4 md:p-8 bg-destructive/10">
+      <div className="max-w-6xl mx-auto text-destructive">
+        <h2>Error loading dashboard</h2>
+        <p>{error}</p>
+        <Button onClick={() => setError(null)}>Try Again</Button>
+      </div>
+    </div>
   }
 
   return (
@@ -34,7 +91,7 @@ export default function CreatorDashboard() {
               <CardTitle className="text-white">My Tracks</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-white">8</p>
+              <p className="text-2xl font-bold text-white">{stats?.tracks || 0}</p>
               <p className="text-gray-400">Total uploads</p>
             </CardContent>
           </Card>
@@ -45,7 +102,7 @@ export default function CreatorDashboard() {
               <CardTitle className="text-white">Fans</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-white">245</p>
+              <p className="text-2xl font-bold text-white">{stats?.followers || 0}</p>
               <p className="text-gray-400">Following you</p>
             </CardContent>
           </Card>
@@ -56,7 +113,7 @@ export default function CreatorDashboard() {
               <CardTitle className="text-white">Earnings</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-white">R1,240</p>
+              <p className="text-2xl font-bold text-white">R{stats?.monthlyEarnings || 0}</p>
               <p className="text-gray-400">This month</p>
             </CardContent>
           </Card>
@@ -79,14 +136,22 @@ export default function CreatorDashboard() {
               <CardTitle className="text-white">My Playlists</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-dark-700 p-4 rounded-lg mb-4">
-                <h3 className="text-white font-semibold">Vibes Playlist</h3>
-                <p className="text-gray-400">8 tracks • 32 minutes</p>
-                <div className="mt-3 space-x-2">
-                  <Button size="sm" variant="outline">Edit</Button>
-                  <Button size="sm" className="bg-primary-600">Go Live</Button>
-                </div>
-              </div>
+              {playlists.length > 0 ? (
+                playlists.map(playlist => (
+                  <div key={playlist.id} className="bg-dark-700 p-4 rounded-lg mb-4">
+                    <h3 className="text-white font-semibold">{playlist.name}</h3>
+                    <p className="text-gray-400">
+                      {playlist.trackCount} tracks • {Math.round(playlist.totalDuration / 60)} minutes
+                    </p>
+                    <div className="mt-3 space-x-2">
+                      <Button size="sm" variant="outline">Edit</Button>
+                      <Button size="sm" className="bg-primary-600">Go Live</Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-center mb-4">No playlists yet</p>
+              )}
               <Button className="w-full bg-primary-600 hover:bg-primary-700">
                 + Create New Playlist
               </Button>
@@ -98,15 +163,30 @@ export default function CreatorDashboard() {
               <CardTitle className="text-white">Next Listening Party</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-dark-700 p-4 rounded-lg">
-                <h3 className="text-white font-semibold">Tonight 8:00 PM</h3>
-                <p className="text-gray-400">Album preview session</p>
-                <p className="text-primary-400 mt-2">45 RSVPs • R20 ticket</p>
-                <div className="mt-4 space-x-2">
-                  <Button size="sm" variant="outline">Cancel</Button>
-                  <Button size="sm" className="bg-primary-600">Share Link</Button>
+              {upcomingSession ? (
+                <div className="bg-dark-700 p-4 rounded-lg">
+                  <h3 className="text-white font-semibold">
+                    {new Date(upcomingSession.startTime).toLocaleString()}
+                  </h3>
+                  <p className="text-gray-400">{upcomingSession.title}</p>
+                  <p className="text-primary-400 mt-2">
+                    {upcomingSession.rsvpCount} RSVPs • R{upcomingSession.ticketPrice} ticket
+                  </p>
+                  <div className="mt-4 space-x-2">
+                    <Button size="sm" variant="outline">Cancel</Button>
+                    <Button size="sm" className="bg-primary-600">Share Link</Button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-400 mb-4">No upcoming sessions</p>
+                  <Link href="/live/create">
+                    <Button className="bg-primary-600 hover:bg-primary-700">
+                      Schedule Session
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

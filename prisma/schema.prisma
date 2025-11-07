@@ -127,3 +127,19 @@ model CoinTransaction {
   relatedId         String?  // sessionId or merchId
   createdAt         DateTime @default(now())
 }
+
+enum TokenType {
+  VERIFY
+  RESET
+}
+
+model Token {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  type      TokenType
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
