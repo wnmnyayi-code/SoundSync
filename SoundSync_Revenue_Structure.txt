@@ -1,0 +1,23 @@
+
+SoundSync Revenue Model - South Africa Only
+
+User Roles:
+- Artist: Registered/Independent/Record Deal (SARS & SAMBRO required)
+- Fan: Can attend events, follow artists, upgrade to creator.
+- Merchant: Can sell sound tools, equipment, and merchandise.
+- Influencer: Paid only for verified user purchases via referral.
+
+Withdrawal Thresholds:
+- Artists: R1000 minimum
+- Influencers: R1000 minimum
+- Merchants: R1000 minimum
+
+Revenue Distribution (R100 spent):
+- Artist: 60% (R60)
+- Influencer: 10% (R10)
+- SoundSync (Platform): 15% (R15)
+- SARS (VAT): 15% (R15)
+
+VAT Rate: 15%
+Currency: ZAR (Rands)
+Location Restriction: South Africa Only

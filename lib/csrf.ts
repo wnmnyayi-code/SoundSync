@@ -23,7 +23,7 @@ export async function setCsrfCookie() {
 
 export async function validateCsrfToken(token: string | null): Promise<boolean> {
   if (!token) return false
-  const cookieStore = cookies()
-  const storedToken = (await cookieStore).get('csrf')?.value
+  const cookieStore = await cookies()
+  const storedToken = cookieStore.get('csrf')?.value
   return token === storedToken
 }

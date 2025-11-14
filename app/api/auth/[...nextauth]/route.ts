@@ -5,10 +5,12 @@ import { authOptions } from '@/lib/auth'
 import { authRateLimiter } from '@/lib/rate-limit'
 import { validateCsrfToken } from '@/lib/csrf'
 
-async function auth(request: NextRequest) {
+const handler = NextAuth(authOptions)
+
+async function auth(request: NextRequest, context: any) {
   // For GET requests, pass through to NextAuth
   if (request.method === 'GET') {
-    return NextAuth(authOptions)(request)
+    return handler(request, context)
   }
 
   try {
@@ -27,9 +29,10 @@ async function auth(request: NextRequest) {
     }
 
     // Validate CSRF token
-    const headersList = headers()
+    const headersList = await headers()
     const csrfToken = headersList.get('x-csrf-token')
-    if (!validateCsrfToken(csrfToken)) {
+    const isValidCsrf = await validateCsrfToken(csrfToken)
+    if (!isValidCsrf) {
       return NextResponse.json(
         { error: 'InvalidCSRFToken' },
         { status: 403 }
@@ -37,7 +40,7 @@ async function auth(request: NextRequest) {
     }
 
     // Pass to NextAuth handler
-    return NextAuth(authOptions)(request)
+    return handler(request, context)
   } catch (error) {
     console.error('Auth error:', error)
     return NextResponse.json(

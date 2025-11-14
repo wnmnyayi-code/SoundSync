@@ -14,9 +14,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "relative px-4 py-2 rounded-lg font-medium transition disabled:opacity-70 disabled:cursor-not-allowed",
           {
-            'bg-primary-600 text-white hover:bg-primary-700': variant === 'default',
-            'border border-primary-600 text-primary-400 hover:bg-primary-600 hover:text-white': variant === 'outline',
-            'hover:bg-primary-600/10': variant === 'ghost',
+            'bg-primary text-primary-foreground hover:bg-primary/90': variant === 'default',
+            'border border-primary text-primary hover:bg-primary hover:text-primary-foreground': variant === 'outline',
+            'hover:bg-primary/10': variant === 'ghost',
             'h-8 px-3 text-sm': size === 'sm',
             'h-10 px-4': size === 'md',
             'h-12 px-6 text-lg': size === 'lg',
