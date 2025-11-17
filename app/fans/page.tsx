@@ -66,7 +66,7 @@ export default function FansPage() {
             For Fans
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Discover amazing South African artists, attend live sessions, and support the music you love
+            Discover amazing artists, attend live sessions, and support the music you love
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
@@ -133,9 +133,6 @@ export default function FansPage() {
               </Card>
             ))}
           </div>
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            All prices include 15% VAT
-          </p>
         </div>
 
         {/* Benefits */}
@@ -207,7 +204,7 @@ export default function FansPage() {
             <CardContent className="p-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Discover Amazing Music?</h2>
               <p className="text-muted-foreground mb-6">
-                Join the SoundSync community and support South African artists
+                Join the SoundSync community and support artists
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">

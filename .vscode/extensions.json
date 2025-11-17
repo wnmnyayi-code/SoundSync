@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "wscats.cors-browser"
+        "wscats.cors-browser",
+        "github.copilot-chat"
     ]
 }

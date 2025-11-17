@@ -23,16 +23,6 @@ export default function ArtistsPage() {
       description: 'Keep 60% of all earnings from tips, merchandise, and music sales'
     },
     {
-      icon: Award,
-      title: 'SAMBRO Registration',
-      description: 'Register your music with SAMBRO directly through SoundSync'
-    },
-    {
-      icon: Shield,
-      title: 'SARS Compliant',
-      description: 'Fully compliant with South African tax regulations'
-    },
-    {
       icon: Zap,
       title: 'Professional Tools',
       description: 'Access mixing and mastering services for your tracks'
@@ -41,7 +31,6 @@ export default function ArtistsPage() {
 
   const requirements = [
     'SARS clearance certificate',
-    'SAMBRO registration (or apply through us)',
     'Declare sampled music (SA law compliance)',
     'High-resolution profile picture',
     'Choose artist status: Independent, Registered, or Signed'
@@ -66,7 +55,7 @@ export default function ArtistsPage() {
             For Artists
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Share your music, build your fanbase, and earn revenue on South Africa's premier music platform
+            Share your music, build your fanbase, and earn revenue on the premier music platform
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
@@ -145,7 +134,7 @@ export default function ArtistsPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Register as Artist</p>
-                  <p className="text-sm text-muted-foreground">Complete verification with SARS and SAMBRO</p>
+                  <p className="text-sm text-muted-foreground">Complete verification with SARS</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -199,7 +188,6 @@ export default function ArtistsPage() {
                   <li>• Artist (you): R60</li>
                   <li>• Influencer (if referred): R10</li>
                   <li>• SoundSync Platform: R15</li>
-                  <li>• SARS (VAT): R15</li>
                 </ul>
               </div>
             </div>
@@ -212,7 +200,7 @@ export default function ArtistsPage() {
             <CardContent className="p-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Start Your Journey?</h2>
               <p className="text-muted-foreground mb-6">
-                Join thousands of South African artists already earning on SoundSync
+                Join thousands of artists already earning on SoundSync
               </p>
               <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
                 <Link href="/register">

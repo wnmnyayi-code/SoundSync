@@ -1,0 +1,36 @@
+SoundSync Android App Package
+Version: 1.0.0
+Package Name: com.soundsync.app
+Size: 38.5 MB
+Min SDK: Android 8.0 (API 26)
+Target SDK: Android 14 (API 34)
+
+This is a placeholder file. In production, this would be replaced with the actual APK file.
+
+To build the actual Android app:
+1. Set up React Native or Flutter project
+2. Implement all SoundSync features
+3. Configure Android build settings
+4. Sign the APK with release keystore
+5. Test on multiple Android devices
+6. Upload to Google Play Console
+
+Features included:
+- User authentication
+- Music streaming
+- Offline playback
+- Live sessions
+- Playlist management
+- Payment integration
+- Push notifications
+- Background audio
+- Material Design UI
+
+Build command (React Native):
+cd android && ./gradlew assembleRelease
+
+Build command (Flutter):
+flutter build apk --release
+
+The signed APK will be available at:
+android/app/build/outputs/apk/release/app-release.apk

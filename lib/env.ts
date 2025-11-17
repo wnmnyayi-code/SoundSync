@@ -1,43 +1,47 @@
+// lib/env.ts
 import { z } from 'zod'
 
 const envSchema = z.object({
-  // Database
-  POSTGRES_URL: z.string().url(),
-  POSTGRES_PRISMA_URL: z.string().url(),
-  POSTGRES_URL_NON_POOLING: z.string().url(),
-  
-  // Authentication
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+
+  // Prisma / Database
+  DATABASE_URL: z.string().url(),
+
+  // NextAuth / app
   NEXTAUTH_URL: z.string().url(),
-  NEXTAUTH_SECRET: z.string().min(32),
-  
-  // AWS S3
-  AWS_REGION: z.string().default('af-south-1'),
-  AWS_ACCESS_KEY_ID: z.string(),
-  AWS_SECRET_ACCESS_KEY: z.string(),
-  AWS_S3_BUCKET_NAME: z.string(),
-  
-  // Stripe
-  STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
-  STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
-  STRIPE_CONNECTED_ACCOUNT_ID: z.string().startsWith('acct_'),
+  NEXTAUTH_SECRET: z.string(),
 
-  // DRM
-  DRM_LICENSE_SERVER: z.string().url(),
-  DRM_API_KEY: z.string(),
+  // Stripe (Required for payments)
+  STRIPE_SECRET_KEY: z.string().min(1, 'STRIPE_SECRET_KEY is required'),
+  STRIPE_PUBLISHABLE_KEY: z.string().min(1, 'STRIPE_PUBLISHABLE_KEY is required').optional(),
+  STRIPE_CONNECTED_ACCOUNT_ID: z.string().optional(),
 
-  // Vercel
-  VERCEL_TOKEN: z.string(),
-  
-  // Email (SendGrid)
+  // AWS S3 (Optional but recommended for file storage)
+  AWS_REGION: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_S3_BUCKET_NAME: z.string().optional(),
+  AWS_BUCKET_NAME: z.string().optional(),
+
+  // Email (Optional)
   SENDGRID_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().optional(),
+  EMAIL_FROM: z.string().email().optional(),
+
+  // DRM (Optional)
+  DRM_LICENSE_SERVER: z.string().url().optional(),
+  DRM_API_KEY: z.string().optional(),
+
+  // Exchange Rates (Optional)
+  EXCHANGE_RATE_API_URL: z.string().url().optional(),
+  NEXT_PUBLIC_EXCHANGE_RATE_API_URL: z.string().url().optional(),
+
+  // Optional tokens
+  VERCEL_TOKEN: z.string().optional(),
+
+  // Rate limiter redis url (optional)
+  REDIS_URL: z.string().url().optional(),
 })
 
 export const env = envSchema.parse(process.env)
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv extends z.infer<typeof envSchema> {}
-  }
-}
+export type Env = typeof env

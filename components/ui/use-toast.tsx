@@ -11,6 +11,7 @@ type ToasterToast = ToastProps & {
   title?: string
   description?: string
   action?: ToastActionElement
+  variant?: 'default' | 'destructive'
 }
 
 const actionTypes = {

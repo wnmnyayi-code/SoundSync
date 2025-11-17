@@ -87,14 +87,7 @@ export default function UploadPage() {
 
       const uploadRes = await fetch(url, {
         method: 'POST',
-        body: formData,
-        // Track upload progress
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const progress = (progressEvent.loaded * 100) / progressEvent.total
-            setUploadProgress(progress)
-          }
-        }
+        body: formData
       })
 
       if (!uploadRes.ok) throw new Error('Upload failed')
@@ -112,9 +105,21 @@ export default function UploadPage() {
 
       if (!trackRes.ok) throw new Error('Failed to save track')
 
+      const trackData = await trackRes.json()
+      const trackId = trackData.data?.id
+
+      // Trigger audio processing
+      if (trackId) {
+        await fetch('/api/process-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trackId })
+        })
+      }
+
       toast({
         title: 'Upload successful',
-        description: 'Your track has been uploaded and is being processed'
+        description: 'Your track has been uploaded and is being processed for optimal quality'
       })
       
       // Reset form
@@ -173,10 +178,10 @@ export default function UploadPage() {
                       className="hidden"
                       id="file-upload"
                     />
-                    <label htmlFor="file-upload">
-                      <Button as="span" className="bg-primary-600 hover:bg-primary-700">
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <span className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition">
                         Choose File
-                      </Button>
+                      </span>
                     </label>
                   </>
                 )}

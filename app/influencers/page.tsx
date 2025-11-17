@@ -10,7 +10,7 @@ export default function InfluencersPage() {
     {
       icon: Share2,
       title: 'Promote Artists',
-      description: 'Share and promote your favorite South African artists'
+      description: 'Share and promote your favorite artists'
     },
     {
       icon: DollarSign,
@@ -99,7 +99,7 @@ export default function InfluencersPage() {
             For Influencers
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Promote South African artists and earn commissions on every referral
+            Promote artists and earn commissions on every referral
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
@@ -217,10 +217,6 @@ export default function InfluencersPage() {
                 <div className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg">
                   <span className="text-foreground">SoundSync Platform</span>
                   <span className="font-bold text-secondary">R15 (15%)</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-muted/10 rounded-lg">
-                  <span className="text-foreground">SARS (VAT)</span>
-                  <span className="font-bold text-muted-foreground">R15 (15%)</span>
                 </div>
               </div>
             </div>

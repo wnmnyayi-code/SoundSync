@@ -1,63 +1,57 @@
-// src/lib/rate-limit.ts
-import { NextRequest } from 'next/server'
+// lib/rate-limit.ts
+import type { NextRequest } from 'next/server'
+import { env } from './env'
 
-interface RateLimitConfig {
-  maxTokens: number
-  refillRate: number // tokens per second
-  tokensPerRequest?: number
-}
+type RateResult = { success: true } | { success: false; retryAfter: number }
 
-const RATE_LIMITS: { [key: string]: RateLimitConfig } = {
-  default: {
-    maxTokens: 50,
-    refillRate: 10
-  },
-  auth: {
-    maxTokens: 10,
-    refillRate: 2,
-    tokensPerRequest: 2 // Costs more tokens per request
-  },
-  verify: {
-    maxTokens: 5,
-    refillRate: 1,
-    tokensPerRequest: 1
-  }
-}
+// Simple in-memory map: key -> { tokens, lastRefill }
+const BUCKETS = new Map<string, { tokens: number; lastRefill: number }>()
 
-export function createRateLimiter(config: RateLimitConfig = RATE_LIMITS.default) {
-  const tokenBucket = new Map<string, { tokens: number; lastRefill: number }>()
+/**
+ * token bucket limiter factory
+ * limit: tokens capacity
+ * refillRate: tokens per second
+ */
+function limiterFactory(limit: number, refillRate: number) {
+  return (req: NextRequest): RateResult => {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim()
+      || req.headers.get('x-real-ip')
+      || req.ip // next/server may not expose ip; this is best-effort
+      || 'unknown'
 
-  return function checkRateLimit(req: NextRequest) {
-    const ip = req.headers.get('x-forwarded-for') || 
-               req.headers.get('x-real-ip') || 
-               'unknown'
+    const key = `rl:${ip}`
     const now = Date.now()
-    
-    let bucket = tokenBucket.get(ip)
-    if (!bucket) {
-      bucket = { tokens: config.maxTokens, lastRefill: now }
-      tokenBucket.set(ip, bucket)
+    const bucket = BUCKETS.get(key) ?? { tokens: limit, lastRefill: now }
+
+    // refill tokens
+    const elapsed = (now - bucket.lastRefill) / 1000
+    const refill = Math.floor(elapsed * refillRate)
+    if (refill > 0) {
+      bucket.tokens = Math.min(limit, bucket.tokens + refill)
+      bucket.lastRefill = now
     }
 
-    // Refill tokens based on time passed
-    const timePassed = now - bucket.lastRefill
-    const refillAmount = Math.floor(timePassed / 1000) * config.refillRate
-    bucket.tokens = Math.min(config.maxTokens, bucket.tokens + refillAmount)
-    bucket.lastRefill = now
-
-    const tokensNeeded = config.tokensPerRequest || 1
-    if (bucket.tokens < tokensNeeded) {
-      const retryAfter = Math.ceil((tokensNeeded - bucket.tokens) / config.refillRate)
-      return {
-        success: false,
-        retryAfter
-      }
+    if (bucket.tokens > 0) {
+      bucket.tokens -= 1
+      BUCKETS.set(key, bucket)
+      return { success: true }
+    } else {
+      // estimate retryAfter in seconds
+      const retryAfter = Math.ceil(1 / refillRate) || 1
+      return { success: false, retryAfter }
     }
-
-    bucket.tokens -= tokensNeeded
-    return { success: true }
   }
 }
 
-export const authRateLimiter = createRateLimiter(RATE_LIMITS.auth)
-export const verifyRateLimiter = createRateLimiter(RATE_LIMITS.verify)
+// Example rate limiters
+export const authRateLimiter = limiterFactory(10, 1) // 10 requests, 1 token/sec
+export const verifyRateLimiter = limiterFactory(5, 0.2) // 5 requests, 0.2 token/sec
+
+// ---------------------------
+// PRODUCTION / REDIS NOTE:
+// ---------------------------
+// Replace limiterFactory implementation with a Redis-based token bucket:
+// - Use a Lua script or atomic INCREXPIRE patterns
+// - Example providers: Upstash (REST), ioredis, redis v4
+// - When REDIS_URL is provided, prefer Redis for global rate-limiting.
+// ---------------------------

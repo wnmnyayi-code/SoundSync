@@ -17,14 +17,8 @@ export function Footer() {
               <span className="text-xl font-bold text-foreground">SoundSync</span>
             </div>
             <p className="text-muted-foreground text-sm">
-              South Africa's premier music platform connecting artists, fans, merchants, and influencers.
+              Premier music platform connecting artists, fans, merchants, and influencers worldwide.
             </p>
-            <div className="text-muted-foreground text-sm">
-              <p className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4" />
-                <span>South Africa Only</span>
-              </p>
-            </div>
           </div>
 
           {/* User Roles */}
@@ -47,6 +41,7 @@ export function Footer() {
               <li><Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
               <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
             </ul>
           </div>
 
@@ -71,8 +66,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 SoundSync. All rights reserved. South Africa Only.</p>
-          <p className="mt-1">Prices include 15% VAT where applicable.</p>
+          <p>&copy; 2024 SoundSync. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -24,14 +24,23 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get user data from localStorage (demo)
-    const userData = localStorage.getItem('user')
-    if (!userData) {
-      router.push('/login')
-      return
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/user/profile')
+        if (!response.ok) {
+          router.push('/login')
+          return
+        }
+        const data = await response.json()
+        setUser(data.user)
+      } catch (error) {
+        router.push('/login')
+      } finally {
+        setLoading(false)
+      }
     }
-    setUser(JSON.parse(userData))
-    setLoading(false)
+    
+    fetchUser()
   }, [router])
 
   if (loading) {

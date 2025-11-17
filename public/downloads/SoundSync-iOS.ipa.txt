@@ -1,0 +1,44 @@
+SoundSync iOS App Package
+Version: 1.0.0
+Bundle ID: com.soundsync.app
+Size: 45.2 MB
+Min iOS: 15.0
+Target iOS: 17.0
+
+This is a placeholder file. In production, this would be replaced with the actual IPA file.
+
+To build the actual iOS app:
+1. Set up React Native or Flutter project
+2. Implement all SoundSync features
+3. Configure iOS build settings in Xcode
+4. Set up provisioning profiles and certificates
+5. Test on multiple iOS devices
+6. Submit to App Store Connect
+
+Features included:
+- User authentication
+- Music streaming
+- Offline playback
+- Live sessions
+- Playlist management
+- Payment integration (Apple Pay)
+- Push notifications
+- Background audio
+- Native iOS design
+- Widget support
+- CarPlay integration
+
+Build command (React Native):
+cd ios && xcodebuild -workspace SoundSync.xcworkspace -scheme SoundSync -configuration Release archive
+
+Build command (Flutter):
+flutter build ios --release
+
+The IPA file will be created through Xcode's Archive process:
+Product → Archive → Distribute App → Export
+
+Required certificates:
+- Apple Developer Program membership
+- Distribution certificate
+- Provisioning profile
+- App Store Connect access

@@ -45,7 +45,7 @@ export async function POST(
 
     // Calculate amounts (in cents for Stripe)
     const amountInCents = amount * 100
-    const vatAmount = amount * 0.15
+    const vatAmount = 0 // VAT disabled
     const platformFee = amount * 0.30
     
     // Create Stripe PaymentIntent

@@ -25,12 +25,7 @@ export default function MerchantsPage() {
     {
       icon: DollarSign,
       title: 'Fair Commission',
-      description: 'Only 10% commission on all sales (VAT included)'
-    },
-    {
-      icon: Shield,
-      title: 'SARS Compliant',
-      description: 'Fully compliant with South African tax regulations'
+      description: 'Only 10% commission on all sales'
     },
     {
       icon: TrendingUp,
@@ -55,7 +50,7 @@ export default function MerchantsPage() {
   const benefits = [
     { label: 'Commission', value: '10%', description: 'on all sales' },
     { label: 'Min Withdrawal', value: 'R1000', description: 'withdraw anytime' },
-    { label: 'VAT Handling', value: '15%', description: 'automatically included' },
+    { label: 'Payment Processing', value: 'Secure', description: 'via Stripe' },
     { label: 'Instant Payouts', value: '24-48h', description: 'after withdrawal' }
   ]
 
@@ -71,7 +66,7 @@ export default function MerchantsPage() {
             For Merchants
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Sell music tools, equipment, and digital products to South Africa's music community
+            Sell music tools, equipment, and digital products to the music community
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
@@ -209,11 +204,8 @@ export default function MerchantsPage() {
                 <p className="mb-2">Example: R1000 product sale</p>
                 <ul className="space-y-1 ml-4">
                   <li>• Merchant (you): R900</li>
-                  <li>• SoundSync Platform: R100 (includes VAT handling)</li>
+                  <li>• SoundSync Platform: R100</li>
                 </ul>
-                <p className="mt-3 text-xs">
-                  * VAT (15%) is automatically calculated and included in all transactions
-                </p>
               </div>
             </div>
           </CardContent>
@@ -257,7 +249,7 @@ export default function MerchantsPage() {
             <CardContent className="p-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Start Selling?</h2>
               <p className="text-muted-foreground mb-6">
-                Join South Africa's premier music marketplace and reach thousands of musicians
+                Join the premier music marketplace and reach thousands of musicians
               </p>
               <Button size="lg" asChild className="gradient-primary text-white hover:opacity-90 shadow-glow">
                 <Link href="/register">

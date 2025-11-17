@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import { PasswordStrength } from '@/components/ui/password-strength'
-import { Eye, EyeOff, Music, Users, ShoppingBag, TrendingUp, Shield } from 'lucide-react'
+import { Eye, EyeOff, Music, Users, ShoppingBag, TrendingUp, Shield, Globe } from 'lucide-react'
 
 type UserRole = 'FAN' | 'ARTIST' | 'MERCHANT' | 'INFLUENCER'
 type SubscriptionTier = 'BASIC' | 'STANDARD' | 'PREMIUM'
@@ -26,7 +26,6 @@ export default function RegisterPage() {
     subscriptionTier: 'BASIC' as SubscriptionTier,
     artistStatus: 'INDEPENDENT' as 'INDEPENDENT' | 'SIGNED' | 'REGISTERED',
     sarsNumber: '',
-    sambro: ''
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -48,9 +47,9 @@ export default function RegisterPage() {
   useEffect(() => {
     // Clear role-specific fields when switching roles
     if (form.primaryRole === 'FAN' || form.primaryRole === 'INFLUENCER') {
-      setForm(prev => ({ ...prev, artistName: '', sarsNumber: '', sambro: '', artistStatus: 'INDEPENDENT' }))
+      setForm(prev => ({ ...prev, artistName: '', sarsNumber: '', artistStatus: 'INDEPENDENT' }))
     }
-    setErrors(prev => ({ ...prev, artistName: '', sarsNumber: '', sambro: '' }))
+    setErrors(prev => ({ ...prev, artistName: '', sarsNumber: '' }))
   }, [form.primaryRole])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -88,35 +87,32 @@ export default function RegisterPage() {
     
     setIsLoading(true)
     try {
-      // For demo: save to localStorage
-      const userData = {
-        id: Math.random().toString(36).substr(2, 9),
-        email: form.email,
-        primaryRole: form.primaryRole,
-        roles: [form.primaryRole],
-        subscriptionTier: form.subscriptionTier,
-        artistName: form.artistName,
-        artistStatus: form.artistStatus,
-        sarsNumber: form.sarsNumber,
-        sambro: form.sambro,
-        coins: 0,
-        verified: false
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed')
       }
-      localStorage.setItem('user', JSON.stringify(userData))
 
       toast({
         title: 'Account created',
-        description: 'Welcome to SoundSync! Redirecting to dashboard...'
+        description: 'Welcome to SoundSync! Please check your email to verify your account.'
       })
       
       setTimeout(() => {
-        router.push('/dashboard')
-      }, 1000)
+        router.push('/login')
+      }, 2000)
     } catch (err) {
       console.error('Register error:', err)
       toast({
         title: 'Error',
-        description: 'An error occurred during registration.'
+        description: err instanceof Error ? err.message : 'An error occurred during registration.',
+        variant: 'destructive'
       })
     } finally {
       setIsLoading(false)
@@ -130,7 +126,7 @@ export default function RegisterPage() {
           <Music className="mx-auto h-12 w-12 text-accent" />
           <h2 className="mt-6 text-3xl font-bold text-foreground">Join SoundSync</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            South Africa's premier music platform
+            The premier music platform
           </p>
         </div>
 
@@ -235,19 +231,6 @@ export default function RegisterPage() {
                     {errors.sarsNumber && <p className="text-destructive text-sm mt-1">{errors.sarsNumber}</p>}
                   </div>
 
-                  <div>
-                    <Label htmlFor="sambro">SAMBRO Registration (Optional)</Label>
-                    <Input
-                      id="sambro"
-                      name="sambro"
-                      value={form.sambro}
-                      onChange={handleInputChange}
-                      placeholder="SAMBRO number or leave blank"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Don't have SAMBRO? We can help you apply for a fee
-                    </p>
-                  </div>
                 </div>
               )}
 
@@ -340,16 +323,11 @@ export default function RegisterPage() {
         <div className="text-center text-xs text-muted-foreground">
           <div className="flex justify-center items-center space-x-4 mb-2">
             <div className="flex items-center space-x-1">
-              <Shield className="w-4 h-4 text-green-400" />
-              <span>SARS Compliant</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span>🇿🇦</span>
-              <span>South Africa Only</span>
+              <Globe className="w-4 h-4 text-blue-400" />
+              <span>Global Platform</span>
             </div>
           </div>
           <p>By creating an account, you agree to our Terms of Service and Privacy Policy</p>
-          <p className="mt-1">All prices include 15% VAT</p>
         </div>
       </div>
     </div>

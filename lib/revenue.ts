@@ -1,4 +1,4 @@
-// SoundSync Revenue Model - South Africa Only
+// SoundSync Revenue Model
 // Based on SoundSync_Revenue_Structure.txt
 
 export interface RevenueBreakdown {
@@ -19,7 +19,7 @@ export const REVENUE_CONSTANTS = {
   ARTIST_SHARE: 0.60,      // 60%
   INFLUENCER_SHARE: 0.10,  // 10%
   PLATFORM_SHARE: 0.15,    // 15%
-  VAT_RATE: 0.15,          // 15% (South African VAT)
+  VAT_RATE: 0.15,          // 15% VAT
   
   // Withdrawal thresholds in ZAR (updated per structure.txt)
   WITHDRAWAL_THRESHOLDS: {
@@ -28,9 +28,8 @@ export const REVENUE_CONSTANTS = {
     merchant: 1000,
   } as UserWithdrawalThresholds,
   
-  // Currency and location settings
+  // Currency settings
   CURRENCY: 'ZAR',
-  LOCATION_RESTRICTION: 'South Africa Only',
   VAT_RATE_DISPLAY: '15%',
 } as const;
 
@@ -40,14 +39,14 @@ export const REVENUE_CONSTANTS = {
  * @returns RevenueBreakdown object with amounts for each party
  */
 export function calculateRevenueBreakdown(totalAmount: number): RevenueBreakdown {
-  const vatAmount = totalAmount * REVENUE_CONSTANTS.VAT_RATE;
-  const netAmount = totalAmount - vatAmount;
+  // Tax/VAT disabled - use full amount for distribution
+  const netAmount = totalAmount;
   
   return {
     artist: netAmount * REVENUE_CONSTANTS.ARTIST_SHARE,
     influencer: netAmount * REVENUE_CONSTANTS.INFLUENCER_SHARE,
     platform: netAmount * REVENUE_CONSTANTS.PLATFORM_SHARE,
-    vat: vatAmount,
+    vat: 0, // VAT disabled
   };
 }
 
@@ -104,7 +103,7 @@ export function formatZAR(amount: number, inCents = false): string {
 }
 
 /**
- * Validate if amount is valid for South African market
+ * Validate if amount is valid
  * @param amount - Amount to validate
  * @returns Object with validity status and error message if invalid
  */

@@ -34,6 +34,15 @@ model User {
   phone             String?
   coinBalance       Int      @default(0)
   verificationStatus VerificationStatus @default(PENDING)
+  audioSettings     Json?    // Audio processing preferences
+  
+  // Social Media Links
+  facebookUrl       String?
+  twitterUrl        String?
+  instagramUrl      String?
+  tiktokUrl         String?
+  youtubeUrl        String?
+  whatsappNumber    String?
   
   // Creator-specific
   storeType         StoreType @default(NONE)
@@ -46,22 +55,54 @@ model User {
   sessions          Session[]
   rsvps             RSVP[]
   merchandise       Merchandise[]
+  tokens            Token[]
+  coinTransactions  CoinTransaction[]
+  socialAccounts    SocialAccount[]
   
   createdAt         DateTime @default(now())
+}
+
+model SocialAccount {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform      String   // facebook, twitter, instagram, tiktok, youtube, whatsapp
+  accountId     String   // Platform-specific user ID
+  username      String?
+  accessToken   String?  // Encrypted OAuth token
+  refreshToken  String?
+  expiresAt     DateTime?
+  isActive      Boolean  @default(true)
+  followers     Int      @default(0)
+  metadata      Json?    // Platform-specific data
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([userId, platform])
 }
 
 model Track {
   id                String   @id @default(cuid())
   filename          String
   originalName      String
-  duration          Int // in seconds
+  fileKey           String   // S3 key for original file
+  processedFileKey  String?  // S3 key for processed file
+  duration          Float    @default(0) // in seconds
+  bitrate           Int?     // audio bitrate
+  sampleRate        Int?     // sample rate in Hz
+  audioFormat       String?  // file format (mp3, flac, etc)
+  lufsLevel         Float?   // processed loudness level
+  originalLufsLevel Float?   // original loudness level
+  processingStatus  String   @default("pending") // pending, processing, completed, failed
+  processingProgress Int     @default(0) // 0-100
+  processingError   String?  // error message if failed
   creatorId         String
   creator           User     @relation(fields: [creatorId], references: [id])
   playlistId        String?
   playlist          Playlist? @relation(fields: [playlistId], references: [id])
   verified          Boolean  @default(false)
   createdAt         DateTime @default(now())
-  expiresAt         DateTime @default(now().add("24 hours"))
+  expiresAt         DateTime?
 }
 
 model Playlist {
