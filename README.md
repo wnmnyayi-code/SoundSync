@@ -304,3 +304,5 @@ For issues or questions:
 # SoundSync
 Music Social Platform
 >>>>>>> 95d68f8cdfe9a6bdbe2dabaf68b85c68a2d79cc7
+#   S o u n d S y n c  
+ 
