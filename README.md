@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎵 SoundSync
 
 **Advanced Music Streaming Platform with Live Sessions, Commerce & Social Features**
@@ -299,3 +300,7 @@ For issues or questions:
 **Built with ❤️ for the music community**
 
 🎵 **SoundSync** - Where music meets community
+=======
+# SoundSync
+Music Social Platform
+>>>>>>> 95d68f8cdfe9a6bdbe2dabaf68b85c68a2d79cc7
