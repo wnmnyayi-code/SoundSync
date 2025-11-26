@@ -1,0 +1,2 @@
+# SoundSync
+Music Social Platform
