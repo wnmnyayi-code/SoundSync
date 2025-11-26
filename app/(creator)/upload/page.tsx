@@ -12,13 +12,17 @@ import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import { uploadSchema, type UploadFormData } from '@/types/upload'
 
+// Extend UploadFormData to include isExplicit if not already there
+// We might need to update the zod schema in types/upload as well, but for now we'll just add the input.
+
+
 export default function UploadPage() {
   const { data: session } = useSession()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const { toast } = useToast()
-  
+
   const form = useForm<UploadFormData>({
     resolver: zodResolver(uploadSchema),
     defaultValues: {
@@ -35,7 +39,7 @@ export default function UploadPage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    
+
     // Validate file size (100MB max)
     if (file.size > 100 * 1024 * 1024) {
       toast({
@@ -69,7 +73,7 @@ export default function UploadPage() {
       const presignRes = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           filename: selectedFile.name,
           contentType: selectedFile.type
         })
@@ -121,7 +125,7 @@ export default function UploadPage() {
         title: 'Upload successful',
         description: 'Your track has been uploaded and is being processed for optimal quality'
       })
-      
+
       // Reset form
       form.reset()
       setSelectedFile(null)
@@ -191,7 +195,7 @@ export default function UploadPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm text-gray-300">Title</label>
-                    <Input 
+                    <Input
                       {...form.register('title')}
                       className="mt-1"
                       error={form.formState.errors.title?.message}
@@ -200,7 +204,7 @@ export default function UploadPage() {
 
                   <div>
                     <label className="text-sm text-gray-300">Description</label>
-                    <Input 
+                    <Input
                       {...form.register('description')}
                       className="mt-1"
                       error={form.formState.errors.description?.message}
@@ -210,7 +214,7 @@ export default function UploadPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm text-gray-300">Genre</label>
-                      <Input 
+                      <Input
                         {...form.register('genre')}
                         className="mt-1"
                         error={form.formState.errors.genre?.message}
@@ -218,7 +222,7 @@ export default function UploadPage() {
                     </div>
                     <div>
                       <label className="text-sm text-gray-300">BPM (optional)</label>
-                      <Input 
+                      <Input
                         type="number"
                         {...form.register('bpm', { valueAsNumber: true })}
                         className="mt-1"
@@ -227,9 +231,21 @@ export default function UploadPage() {
                     </div>
                   </div>
 
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      {...form.register('isExplicit')}
+                      id="isExplicit"
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="isExplicit" className="text-gray-300">
+                      Explicit Content
+                    </label>
+                  </div>
+
                   <div>
                     <label className="text-sm text-gray-300">Price in coins</label>
-                    <Input 
+                    <Input
                       type="number"
                       {...form.register('price', { valueAsNumber: true })}
                       className="mt-1"

@@ -9,6 +9,7 @@ export const uploadSchema = z.object({
   key: z.string().optional(),
   price: z.number().min(0, 'Price must be 0 or greater'),
   drmEnabled: z.boolean().default(false),
+  isExplicit: z.boolean().default(false),
   file: z.instanceof(File)
 })
 

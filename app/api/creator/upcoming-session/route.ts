@@ -3,7 +3,7 @@
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -18,10 +18,10 @@ export async function GET() {
   try {
     const userId = session.user.id
 
-    const upcomingSession = await prisma.liveSession.findFirst({
+    const upcomingSession = await prisma.session.findFirst({
       where: {
-        userId,
-        startTime: {
+        creatorId: userId,
+        scheduledAt: {
           gt: new Date()
         },
         status: 'SCHEDULED'
@@ -32,7 +32,7 @@ export async function GET() {
         }
       },
       orderBy: {
-        startTime: 'asc'
+        scheduledAt: 'asc'
       }
     })
 
@@ -42,10 +42,10 @@ export async function GET() {
 
     return NextResponse.json({
       id: upcomingSession.id,
-      startTime: upcomingSession.startTime,
-      title: upcomingSession.title,
-      description: upcomingSession.description,
-      ticketPrice: upcomingSession.ticketPrice,
+      scheduledAt: upcomingSession.scheduledAt,
+      rsvpPriceCoins: upcomingSession.rsvpPriceCoins,
+      maxAttendees: upcomingSession.maxAttendees,
+      attendees: upcomingSession.attendees,
       rsvpCount: upcomingSession._count.rsvps
     })
   } catch (error) {

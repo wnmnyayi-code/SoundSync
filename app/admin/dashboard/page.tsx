@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,31 +24,60 @@ export default function AdminDashboard() {
     redirect('/login')
   }
 
+  const [statsData, setStatsData] = useState({
+    totalUsers: '0',
+    pendingApprovals: '0',
+    revenue: 'R0',
+    verifiedCreators: '0'
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/admin/stats')
+        if (res.ok) {
+          const data = await res.json()
+          setStatsData({
+            totalUsers: data.totalUsers.toString(),
+            pendingApprovals: data.pendingApprovals.toString(),
+            revenue: `R${data.totalRevenue.toLocaleString()}`,
+            verifiedCreators: data.verifiedCreators.toString()
+          })
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats', error)
+      }
+    }
+    if (session?.user?.role === 'ADMIN') {
+      fetchStats()
+    }
+  }, [session])
+
   const stats = [
     {
       title: 'Total Users',
-      value: '0',
+      value: statsData.totalUsers,
       description: 'Registered users',
       icon: Users,
       color: 'text-blue-400'
     },
     {
       title: 'Pending Approvals',
-      value: '0',
+      value: statsData.pendingApprovals,
       description: 'Awaiting review',
       icon: CheckCircle,
       color: 'text-yellow-400'
     },
     {
       title: 'Platform Revenue',
-      value: 'R0',
-      description: 'This month',
+      value: statsData.revenue,
+      description: 'Total coin sales',
       icon: DollarSign,
       color: 'text-green-400'
     },
     {
       title: 'Verified Creators',
-      value: '0',
+      value: statsData.verifiedCreators,
       description: 'Approved artists',
       icon: CheckCircle,
       color: 'text-purple-400'
@@ -56,25 +86,6 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: 'User Approvals',
-      description: 'Review and approve creator requests',
-      href: '/admin/approvals',
-      icon: CheckCircle,
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      title: 'Financial Dashboard',
-      description: 'View platform revenue and transactions',
-      href: '/admin/financials',
-      icon: DollarSign,
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      title: 'User Management',
-      description: 'Manage all platform users',
-      href: '/admin/users',
-      icon: Users,
-      color: 'from-purple-500 to-pink-500'
     },
     {
       title: 'Platform Settings',
@@ -104,7 +115,7 @@ export default function AdminDashboard() {
               <Card key={index} className="bg-card border-border shadow-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <Icon className={`w-8 h-8 ${stat.color}`} />
+                    {Icon && <Icon className={`w-8 h-8 ${stat.color}`} />}
                   </div>
                   <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
                   <div className="text-sm font-semibold text-foreground mb-1">{stat.title}</div>
@@ -122,11 +133,11 @@ export default function AdminDashboard() {
             {quickActions.map((action, index) => {
               const Icon = action.icon
               return (
-                <Link key={index} href={action.href}>
+                <Link key={index} href={action.href || '#'}>
                   <Card className="bg-card border-border shadow-card hover:shadow-glow transition-all cursor-pointer h-full">
                     <CardContent className="p-6">
                       <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center mb-4`}>
-                        <Icon className="w-6 h-6 text-white" />
+                        {Icon && <Icon className="w-6 h-6 text-white" />}
                       </div>
                       <h3 className="text-lg font-semibold text-foreground mb-2">{action.title}</h3>
                       <p className="text-sm text-muted-foreground">{action.description}</p>

@@ -1,5 +1,16 @@
+// components/providers/auth-provider.tsx
 'use client'
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+import { SessionProvider } from 'next-auth/react'
+
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <SessionProvider>
+      {children}
+    </SessionProvider>
+  )
 }

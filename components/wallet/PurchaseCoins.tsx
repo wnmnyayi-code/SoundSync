@@ -34,7 +34,12 @@ const COIN_PACKAGES = [
   { zar: 50, coins: calculateCoins(50), bonus: Math.floor(calculateCoins(50) - 50 * COINS_PER_ZAR) },
 ]
 
-function PurchaseForm({ selectedPackage, onSuccess }: any) {
+interface PurchaseFormProps {
+  selectedPackage: { zar: number; coins: number; bonus: number }
+  onSuccess: (coins: number) => void
+}
+
+function PurchaseForm({ selectedPackage, onSuccess }: PurchaseFormProps) {
   const stripe = useStripe()
   const elements = useElements()
   const [loading, setLoading] = useState(false)
@@ -81,7 +86,12 @@ function PurchaseForm({ selectedPackage, onSuccess }: any) {
   )
 }
 
-export default function PurchaseCoins({ isOpen, onClose }: any) {
+interface PurchaseCoinsProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function PurchaseCoins({ isOpen, onClose }: PurchaseCoinsProps) {
   const [selectedPackage, setSelectedPackage] = useState(COIN_PACKAGES[1])
   const [customAmount, setCustomAmount] = useState<string>('')
   const [useCustom, setUseCustom] = useState(false)
@@ -128,7 +138,7 @@ export default function PurchaseCoins({ isOpen, onClose }: any) {
             </div>
             {customAmount && (
               <div className="text-center p-2 bg-dark-700 rounded">
-                <p className="text-sm text-gray-400">You'll receive</p>
+                <p className="text-sm text-gray-400">You&apos;ll receive</p>
                 <p className="text-xl font-bold text-primary-400">
                   {customCoins.toLocaleString()} coins
                 </p>

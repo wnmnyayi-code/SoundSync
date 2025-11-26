@@ -1,186 +1,318 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_URL") // Vercel will auto-populate this
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
-  FAN
-  CREATOR
   ADMIN
+  CREATOR
+  FAN
+  MERCHANT
+  INFLUENCER
 }
 
 enum VerificationStatus {
   PENDING
-  APPROVED
+  VERIFIED
   REJECTED
 }
 
-enum StoreType {
-  NONE
-  RENTED
-  PERMANENT
-}
-
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  password          String
-  role              Role     @default(FAN)
-  artistName        String?
-  phone             String?
-  coinBalance       Int      @default(0)
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  password           String
+  role               Role               @default(FAN)
+  selectedRoles      Json?
+  artistName         String?
+  coinBalance        Float              @default(0)
+  isVerified         Boolean            @default(false)
   verificationStatus VerificationStatus @default(PENDING)
-  audioSettings     Json?    // Audio processing preferences
-  
-  // Social Media Links
-  facebookUrl       String?
-  twitterUrl        String?
-  instagramUrl      String?
-  tiktokUrl         String?
-  youtubeUrl        String?
-  whatsappNumber    String?
-  
-  // Creator-specific
-  storeType         StoreType @default(NONE)
-  storeRentExpiry   DateTime?
-  totalPlaylists    Int       @default(1)
-  
+  emailVerified      DateTime?
+  image              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
   // Relations
-  tracks            Track[]
-  playlists         Playlist[]
-  sessions          Session[]
-  rsvps             RSVP[]
-  merchandise       Merchandise[]
-  tokens            Token[]
-  coinTransactions  CoinTransaction[]
-  socialAccounts    SocialAccount[]
-  
-  createdAt         DateTime @default(now())
+  accounts         Account[]
+  sessions         Session[]
+  tracks           Track[]
+  playlists        Playlist[]
+  notifications    Notification[]
+  orders           Order[]
+  transactions     Transaction[]
+  sentMessages     Message[]             @relation("SentMessages")
+  receivedMessages Message[]             @relation("ReceivedMessages")
+  comments         Comment[]
+  likes            Like[]
+  following        Follow[]              @relation("Follower")
+  followers        Follow[]              @relation("Following")
+  reportsFiled     Report[]              @relation("ReportedBy")
+  reportsAgainst   Report[]              @relation("ReportedUsers")
+  verification     VerificationRequest[]
+  apiKeys          ApiKey[]
+  analytics        Analytics[]
+
+  // Indexes
+  @@index([email])
+  @@index([role])
+  @@index([isVerified])
+  @@index([createdAt])
 }
 
-model SocialAccount {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  platform      String   // facebook, twitter, instagram, tiktok, youtube, whatsapp
-  accountId     String   // Platform-specific user ID
-  username      String?
-  accessToken   String?  // Encrypted OAuth token
-  refreshToken  String?
-  expiresAt     DateTime?
-  isActive      Boolean  @default(true)
-  followers     Int      @default(0)
-  metadata      Json?    // Platform-specific data
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@unique([userId, platform])
-}
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model Track {
-  id                String   @id @default(cuid())
-  filename          String
-  originalName      String
-  fileKey           String   // S3 key for original file
-  processedFileKey  String?  // S3 key for processed file
-  duration          Float    @default(0) // in seconds
-  bitrate           Int?     // audio bitrate
-  sampleRate        Int?     // sample rate in Hz
-  audioFormat       String?  // file format (mp3, flac, etc)
-  lufsLevel         Float?   // processed loudness level
-  originalLufsLevel Float?   // original loudness level
-  processingStatus  String   @default("pending") // pending, processing, completed, failed
-  processingProgress Int     @default(0) // 0-100
-  processingError   String?  // error message if failed
-  creatorId         String
-  creator           User     @relation(fields: [creatorId], references: [id])
-  playlistId        String?
-  playlist          Playlist? @relation(fields: [playlistId], references: [id])
-  verified          Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  expiresAt         DateTime?
-}
-
-model Playlist {
-  id                String   @id @default(cuid())
-  name              String   @default("My Playlist")
-  creatorId         String
-  creator           User     @relation(fields: [creatorId], references: [id])
-  tracks            Track[]
-  maxTracks         Int      @default(10)
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
-  id                String   @id @default(cuid())
-  creatorId         String
-  creator           User     @relation(fields: [creatorId], references: [id])
-  scheduledAt       DateTime
-  rsvpPriceCoins    Int      @default(0)
-  maxAttendees      Int      @default(100)
-  status            String   @default("SCHEDULED") // SCHEDULED, LIVE, ENDED, CANCELLED
-  streamUrl         String?  // Temporary URL
-  attendees         Int      @default(0)
-  rsvps             RSVP[]
-  createdAt         DateTime @default(now())
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
-model RSVP {
-  id                String   @id @default(cuid())
-  sessionId         String
-  session           Session  @relation(fields: [sessionId], references: [id])
-  fanId             String
-  fan               User     @relation(fields: [fanId], references: [id])
-  amountPaid        Int      // in coins
-  vatAmount         Float    @default(0)
-  platformFee       Float    @default(0)
-  refunded          Boolean  @default(false)
-  createdAt         DateTime @default(now())
+model VerificationRequest {
+  id         String   @id @default(uuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+  @@index([userId])
 }
 
-model Merchandise {
-  id                String   @id @default(cuid())
-  creatorId         String
-  creator           User     @relation(fields: [creatorId], references: [id])
-  title             String
-  description       String?
-  price             Float    // in ZAR
-  type              String   // "physical" or "digital"
-  fileUrl           String?  // for digital items
-  imageUrl          String?
-  sold              Int      @default(0)
-  createdAt         DateTime @default(now())
+model Track {
+  id            String          @id @default(uuid())
+  title         String
+  description   String?
+  url           String
+  duration      Int
+  genre         String?
+  isPublic      Boolean         @default(true)
+  plays         Int             @default(0)
+  likes         Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  userId        String
+  user          User            @relation(fields: [userId], references: [id])
+  playlists     PlaylistTrack[]
+  comments      Comment[]
+  likesRelation Like[]
+  orderItems    OrderItem[]
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
-model CoinTransaction {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id])
-  type              String   // "PURCHASE", "TIP", "RSVP", "REFUND"
-  amount            Int      // coin amount
-  zarAmount         Float?   // ZAR equivalent
-  vatAmount         Float    @default(0)
-  relatedId         String?  // sessionId or merchId
-  createdAt         DateTime @default(now())
+model Playlist {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  isPublic    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  tracks      PlaylistTrack[]
+
+  @@index([userId])
 }
 
-enum TokenType {
-  VERIFY
-  RESET
+model PlaylistTrack {
+  id         String   @id @default(uuid())
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+  playlistId String
+  track      Track    @relation(fields: [trackId], references: [id])
+  trackId    String
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId])
+  @@index([trackId])
 }
 
-model Token {
-  id        String    @id @default(cuid())
-  token     String    @unique
-  type      TokenType
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  read      Boolean  @default(false)
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  expiresAt DateTime
-  used      Boolean   @default(false)
-  createdAt DateTime  @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  amount    Float
+  status    String
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  track     Track?   @relation(fields: [trackId], references: [id])
+  trackId   String?
+  quantity  Int      @default(1)
+  price     Float
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([trackId])
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  amount      Float
+  type        String
+  status      String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  content     String
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([trackId])
+  @@index([createdAt])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, trackId])
+  @@index([userId])
+  @@index([trackId])
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  type       String
+  reason     String
+  status     String   @default("PENDING")
+  reporterId String
+  reporter   User     @relation("ReportedBy", fields: [reporterId], references: [id])
+  reportedId String
+  reported   User     @relation("ReportedUsers", fields: [reportedId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([createdAt])
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  name       String
+  key        String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Analytics {
+  id        String   @id @default(uuid())
+  event     String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  ip        String?
+  userAgent String?
+  path      String
+  query     Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([event])
 }

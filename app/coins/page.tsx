@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+import { useToast } from '@/components/ui/use-toast'
+import { useSession } from 'next-auth/react'
 import { Coins, CreditCard, Zap, Shield, Check, Calculator } from 'lucide-react'
 
 export default function CoinsPage() {
@@ -18,7 +21,7 @@ export default function CoinsPage() {
 
   const calculateCoins = (zarAmount: number): number => {
     const baseCoins = zarAmount * COINS_PER_ZAR
-    
+
     // Bonus tiers
     let bonus = 0
     if (zarAmount >= 200) {
@@ -30,7 +33,7 @@ export default function CoinsPage() {
     } else if (zarAmount >= 25) {
       bonus = Math.floor(baseCoins * 0.05) // 5% bonus for R25+
     }
-    
+
     return baseCoins + bonus
   }
 
@@ -87,10 +90,61 @@ export default function CoinsPage() {
     'Priority support'
   ]
 
-  const handlePurchase = (packageId: string) => {
-    setSelectedPackage(packageId)
-    // Integrate with Stripe here
-    alert('Stripe checkout would open here. Package: ' + packageId)
+  const { data: session } = useSession()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handlePurchase = async (packageId: string, type: 'coins' | 'shelf_space' = 'coins', price?: number) => {
+    if (!session) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please login to purchase coins',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const purchasePrice = price || coinPackages.find(p => p.id === packageId)?.price || 0
+
+      // In a real app, we would get a paymentMethodId from Stripe Elements
+      // For this demo/dev, we'll simulate it
+      const paymentMethodId = 'pm_card_visa'
+
+      const res = await fetch('/api/wallet/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price: purchasePrice,
+          paymentMethodId,
+          type
+        })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Purchase failed')
+      }
+
+      toast({
+        title: 'Purchase Successful!',
+        description: type === 'shelf_space'
+          ? 'Your shelf space has been expanded!'
+          : `Successfully purchased ${data.data.coins} coins!`
+      })
+
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Purchase Failed',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -108,6 +162,36 @@ export default function CoinsPage() {
             Support your favorite artists and unlock exclusive features with SoundSync coins
           </p>
         </div>
+
+        {/* Shelf Space Special */}
+        <Card className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-primary/50 shadow-glow mb-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Zap className="w-64 h-64 text-white" />
+          </div>
+          <CardContent className="p-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Creator Shelf Space</h2>
+              <p className="text-blue-100 text-lg mb-4">Expand your creative potential. Get more room for your music.</p>
+              <ul className="space-y-2 text-blue-200">
+                <li className="flex items-center"><Check className="w-5 h-5 mr-2 text-green-400" /> +5 Playlists</li>
+                <li className="flex items-center"><Check className="w-5 h-5 mr-2 text-green-400" /> +50 Tracks Upload Limit</li>
+              </ul>
+            </div>
+            <div className="text-center bg-black/30 p-6 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="text-4xl font-bold text-white mb-1">R99</div>
+              <div className="text-sm text-blue-200 mb-4">One-time purchase</div>
+              <Button
+                size="lg"
+                className="w-full gradient-primary text-white shadow-lg hover:shadow-primary/50 transition-all"
+                onClick={() => handlePurchase('shelf_space', 'shelf_space', 99)}
+                disabled={isLoading}
+              >
+                {isLoading ? <Spinner className="mr-2" /> : <Zap className="w-5 h-5 mr-2" />}
+                Expand Now
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Custom Amount Calculator */}
         <Card className="bg-card border-border shadow-glow mb-8">
@@ -158,7 +242,7 @@ export default function CoinsPage() {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">coins</p>
-                  
+
                   {bonusPercentage > 0 && customAmount && (
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-sm text-accent font-semibold">
@@ -197,18 +281,18 @@ export default function CoinsPage() {
               </div>
             </div>
 
-            <Button 
+            <Button
               onClick={() => {
                 if (isValidCustomAmount) {
-                  handlePurchase('custom')
+                  handlePurchase('custom', 'coins', customAmountNum)
                   setUseCustomAmount(true)
                 }
               }}
-              disabled={!isValidCustomAmount}
+              disabled={!isValidCustomAmount || isLoading}
               className="w-full mt-4 gradient-primary text-white"
               size="lg"
             >
-              <CreditCard className="w-5 h-5 mr-2" />
+              {isLoading ? <Spinner className="mr-2" /> : <CreditCard className="w-5 h-5 mr-2" />}
               Purchase {customAmount ? calculatedCoins.toLocaleString() : '0'} Coins for R{customAmount || '0'}
             </Button>
           </CardContent>
@@ -222,8 +306,8 @@ export default function CoinsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {coinPackages.map((pkg) => (
-            <Card 
-              key={pkg.id} 
+            <Card
+              key={pkg.id}
               className={`bg-card border-border ${pkg.popular ? 'ring-2 ring-primary shadow-glow' : 'shadow-card'} relative hover:shadow-glow transition-all`}
             >
               {pkg.popular && (
@@ -252,12 +336,13 @@ export default function CoinsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button 
-                  onClick={() => handlePurchase(pkg.id)}
+                <Button
+                  onClick={() => handlePurchase(pkg.id, 'coins', pkg.price)}
                   className={`w-full ${pkg.popular ? 'gradient-primary text-white' : ''}`}
                   variant={pkg.popular ? 'default' : 'outline'}
+                  disabled={isLoading}
                 >
-                  <CreditCard className="w-4 h-4 mr-2" />
+                  {isLoading ? <Spinner className="mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
                   Purchase
                 </Button>
               </CardContent>

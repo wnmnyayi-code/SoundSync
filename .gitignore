@@ -30,20 +30,58 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-/src/generated/prisma
-
-.vercel
+# local env files (NEVER COMMIT THESE!)
+.env
+.env.local
 .env*.local
 
-# auxiliary documentation folder
-/auxiliary
+# vercel
+.vercel
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+.qodo
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.temp-*
+
+# Logs
+logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (local development)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Additional project files (internal documentation)
+/SoundSyncAdditionalFiles
+
+# Temporary scripts (development only)
+test-supabase-connection.ts
+verify-setup.ts
+verify-admin.ts
+test-connection.ts
+test-db.ts
+fix.txt
+env_fix.txt

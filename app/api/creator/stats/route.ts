@@ -3,7 +3,7 @@
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -18,35 +18,39 @@ export async function GET() {
   try {
     const userId = session.user.id
 
-    const [tracks, followers, earnings, totalRevenue] = await Promise.all([
-      prisma.track.count({ where: { userId } }),
-      prisma.follow.count({ where: { followingId: userId } }),
-      prisma.transaction.aggregate({
+    const [tracks, playlists, coinTransactions] = await Promise.all([
+      prisma.track.count({ where: { creatorId: userId } }),
+      prisma.playlist.count({ where: { creatorId: userId } }),
+      prisma.coinTransaction.findMany({
         where: {
-          creatorId: userId,
-          createdAt: {
-            gte: new Date(new Date().setMonth(new Date().getMonth() - 1))
-          }
+          userId: userId,
+          type: { in: ['TIP', 'RSVP'] }
         },
-        _sum: {
-          amount: true
-        }
-      }),
-      prisma.transaction.aggregate({
-        where: {
-          creatorId: userId
-        },
-        _sum: {
-          amount: true
+        orderBy: {
+          createdAt: 'desc'
         }
       })
     ])
 
+    // Calculate earnings from coin transactions
+    const monthlyEarnings = coinTransactions
+      .filter(t => {
+        const transactionDate = new Date(t.createdAt)
+        const oneMonthAgo = new Date()
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+        return transactionDate >= oneMonthAgo
+      })
+      .reduce((sum, t) => sum + (t.zarAmount || 0), 0)
+
+    const totalRevenue = coinTransactions
+      .reduce((sum, t) => sum + (t.zarAmount || 0), 0)
+
     return NextResponse.json({
       tracks,
-      followers,
-      monthlyEarnings: earnings._sum.amount || 0,
-      totalRevenue: totalRevenue._sum.amount || 0
+      playlists,
+      followers: 0, // TODO: Add follow system
+      monthlyEarnings,
+      totalRevenue
     })
   } catch (error) {
     console.error('Failed to fetch creator stats:', error)

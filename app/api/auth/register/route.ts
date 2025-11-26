@@ -1,63 +1,112 @@
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { hashPassword } from '@/lib/password'
-import { z } from 'zod'
-import crypto from 'crypto'
-import sendEmail from '@/lib/mailer'
-import { env } from '@/lib/env'
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
+import crypto from 'crypto';
+import sendEmail from '@/lib/mailer';
+import { env } from '@/lib/env';
 
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(['FAN', 'CREATOR', 'ADMIN']).default('FAN'),
+  role: z.string().optional(),
+  subscriptionTier: z.string().optional(),
   artistName: z.string().optional(),
-})
+  artistStatus: z.string().optional(),
+  sarsNumber: z.string().optional(),
+  referralCode: z.string().optional()
+});
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-    const parsed = registerSchema.safeParse(body)
+    const body = await req.json();
+    const parsed = registerSchema.safeParse(body);
+
     if (!parsed.success) {
-      return NextResponse.json({ success: false, error: 'Invalid input' }, { status: 400 })
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid input',
+        details: parsed.error.errors
+      }, { status: 400 });
     }
 
-    const { email, password, role, artistName } = parsed.data
+    const data = parsed.data;
 
-    // prevent duplicate accounts
-    const existing = await prisma.user.findUnique({ where: { email } })
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
     if (existing) {
-      return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 400 });
     }
 
-    const hashed = await hashPassword(password)
+    const saltRounds = parseInt(env.BCRYPT_SALT_ROUNDS || '12', 10);
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+
+    // Handle single role from new form
+    const roleInput = data.role || 'FAN';
+    const selectedRoles = [roleInput === 'CREATOR' ? 'ARTIST' : roleInput];
+
+    // Check for default admin credentials
+    const isDefaultAdmin = data.email === 'admin@soundsync.co.za' && data.password === 'SoundSync@Admin2025!';
+
+    let primaryRole = roleInput;
+    let verificationStatus = 'APPROVED'; // Auto-approve for now for easier testing
+    let subscriptionTier = data.subscriptionTier ?? 'BASIC';
+
+    if (isDefaultAdmin) {
+      primaryRole = 'ADMIN';
+      verificationStatus = 'APPROVED';
+      subscriptionTier = 'PREMIUM';
+    }
 
     const user = await prisma.user.create({
       data: {
-        email,
-        password: hashed,
-        role,
-        artistName: role === 'CREATOR' ? artistName ?? null : null,
-        verificationStatus: 'PENDING',
-      },
-    })
+        email: data.email,
+        password: hashedPassword,
+        role: primaryRole as any,
+        // Admin gets all possible roles
+        selectedRoles: isDefaultAdmin ? ['FAN', 'ARTIST', 'MERCHANT', 'INFLUENCER'] : selectedRoles,
+        subscriptionTier: subscriptionTier,
+        artistName: data.artistName ?? null,
+        verificationStatus: verificationStatus as any
+      }
+    });
 
-    // Create verification token and send email (or log)
-    const token = crypto.randomBytes(32).toString('hex')
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24) // 24 hours
-    await prisma.token.create({ data: { token, type: 'VERIFY', userId: user.id, expiresAt } })
-    const verifyUrl = `${env.NEXTAUTH_URL}/verify?token=${token}`
-    await sendEmail({
-      to: email,
-      subject: 'Verify your SoundSync account',
-      text: `Verify your account by visiting: ${verifyUrl}`,
-      html: `<p>Click to verify your account: <a href="${verifyUrl}">${verifyUrl}</a></p>`
-    })
+    // Handle Referral
+    if (data.referralCode) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode: data.referralCode }
+      });
 
-  return NextResponse.json({ success: true, data: { id: user.id } }, { status: 201 })
+      if (referrer) {
+        await prisma.referral.create({
+          data: {
+            referrerId: referrer.id,
+            referredUserId: user.id
+          }
+        });
+      }
+    }
+
+    // send verification token (best-effort)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await prisma.token.create({ data: { token, type: 'VERIFICATION', userId: user.id, expiresAt } });
+    try {
+      const verifyUrl = `${env.NEXTAUTH_URL}/verify?token=${token}`;
+      await sendEmail({
+        to: user.email,
+        subject: 'Verify your SoundSync account',
+        text: `Verify your account: ${verifyUrl}`,
+        html: `<p>Verify: <a href="${verifyUrl}">${verifyUrl}</a></p>`
+      });
+    } catch (e) {
+      console.error('Email send failed:', e);
+    }
+
+    return NextResponse.json({ success: true, user: { id: user.id, roles: selectedRoles, subscriptionTier: user.subscriptionTier } }, { status: 201 });
   } catch (err) {
-    console.error('Register error:', err)
-    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })
+    console.error(err);
+    return NextResponse.json({ success: false, error: (err as Error).message || 'Server error' }, { status: 500 });
   }
 }
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';

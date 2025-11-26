@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import prisma from '@/lib/prisma'
 import { env } from '@/lib/env'
 import type { ApiResponse, UploadResponse } from '@/types/api'
 
@@ -20,7 +19,7 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<UploadResponse>>> {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id || session.user.role !== 'CREATOR') {
       return NextResponse.json({
         success: false,
@@ -29,8 +28,9 @@ export async function POST(
     }
 
     const formData = await req.formData()
-    const file = formData.get('track') as File
-    
+    const file = (formData.get('file') || formData.get('track')) as File
+    const type = formData.get('type') as string || 'track' // 'track' or 'image'
+
     if (!file) {
       return NextResponse.json({
         success: false,
@@ -39,8 +39,9 @@ export async function POST(
     }
 
     // Generate unique key (auto-deleted by S3 lifecycle policy after 24h)
-    const key = `temp-streams/${session.user.id}/${Date.now()}-${file.name}`
-    
+    const prefix = type === 'image' ? 'images' : 'temp-streams'
+    const key = `${prefix}/${session.user.id}/${Date.now()}-${file.name}`
+
     // Create S3 command
     const command = new PutObjectCommand({
       Bucket: env.AWS_BUCKET_NAME,
@@ -56,7 +57,7 @@ export async function POST(
     // Generate presigned URL (valid for 5 minutes)
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 })
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       data: {
         uploadUrl,

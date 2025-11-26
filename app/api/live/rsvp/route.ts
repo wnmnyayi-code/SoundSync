@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -14,8 +14,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sessionId } = await request.json()
-    
+    const { sessionId, targetUserId } = await request.json()
+
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Session ID is required' },
@@ -23,8 +23,19 @@ export async function POST(request: Request) {
       )
     }
 
+    // Determine who the RSVP is for
+    let fanId = session.user.id
+    if (targetUserId) {
+      // Verify target user exists
+      const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } })
+      if (!targetUser) {
+        return NextResponse.json({ error: 'Target user not found' }, { status: 404 })
+      }
+      fanId = targetUserId
+    }
+
     // Check if session exists and has capacity
-    const liveSession = await prisma.liveSession.findUnique({
+    const liveSession = await prisma.session.findUnique({
       where: { id: sessionId }
     })
 
@@ -35,27 +46,78 @@ export async function POST(request: Request) {
       )
     }
 
-    if (liveSession.currentAttendees >= liveSession.maxAttendees) {
+    if (liveSession.attendees >= liveSession.maxAttendees) {
       return NextResponse.json(
         { error: 'Session is full' },
         { status: 400 }
       )
     }
 
+    // Check if fan already RSVPed
+    const existingRsvp = await prisma.rSVP.findFirst({
+      where: {
+        sessionId,
+        fanId: fanId
+      }
+    })
+
+    if (existingRsvp) {
+      return NextResponse.json(
+        { error: targetUserId ? 'User already has an RSVP' : 'You have already RSVPed to this session' },
+        { status: 400 }
+      )
+    }
+
+    // Check payer balance and deduct coins if price > 0
+    if (liveSession.rsvpPriceCoins > 0) {
+      const payer = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { coinBalance: true }
+      })
+
+      if (!payer || payer.coinBalance < liveSession.rsvpPriceCoins) {
+        return NextResponse.json(
+          { error: 'Insufficient coins' },
+          { status: 400 }
+        )
+      }
+
+      // Deduct coins from payer
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          coinBalance: {
+            decrement: liveSession.rsvpPriceCoins
+          }
+        }
+      })
+
+      // Record transaction
+      await prisma.coinTransaction.create({
+        data: {
+          userId: session.user.id,
+          type: targetUserId ? 'GIFT_RSVP' : 'RSVP',
+          amount: -liveSession.rsvpPriceCoins,
+          relatedId: sessionId,
+          vatAmount: 0 // VAT disabled for now
+        }
+      })
+    }
+
     // Create RSVP
     await prisma.rSVP.create({
       data: {
-        userId: session.user.id,
+        fanId: fanId,
         sessionId,
-        status: 'CONFIRMED'
+        amountPaid: liveSession.rsvpPriceCoins
       }
     })
 
     // Increment attendee count
-    await prisma.liveSession.update({
+    await prisma.session.update({
       where: { id: sessionId },
       data: {
-        currentAttendees: {
+        attendees: {
           increment: 1
         }
       }

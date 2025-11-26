@@ -1,6 +1,6 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { env } from './env'
-import { normalizeAudio, type ProcessingOptions, type ProcessingResult } from './audio-processor'
+import { normalizeAudio, type ProcessingOptions, type ProcessingResult } from './audioProcessor'
 import prisma from './prisma'
 
 const s3 = new S3Client({
@@ -32,20 +32,20 @@ export async function processAudioFile(job: AudioProcessingJob): Promise<Process
   try {
     // Update status to processing
     await updateTrackStatus(job.trackId, 'processing', 0)
-    
+
     // Download original file from S3
     const originalBuffer = await downloadFromS3(job.originalFileKey)
     await updateTrackStatus(job.trackId, 'processing', 25)
-    
+
     // Process audio (normalize and master)
     const result = await normalizeAudio(originalBuffer, job.options)
     await updateTrackStatus(job.trackId, 'processing', 75)
-    
+
     // Upload processed file to S3
     const processedFileKey = job.originalFileKey.replace('temp-streams/', 'processed-streams/')
     await uploadToS3(processedFileKey, result.processedBuffer, 'audio/mpeg')
     await updateTrackStatus(job.trackId, 'processing', 90)
-    
+
     // Update track in database with processing results
     await prisma.track.update({
       where: { id: job.trackId },
@@ -60,9 +60,9 @@ export async function processAudioFile(job: AudioProcessingJob): Promise<Process
         originalLufsLevel: result.originalMetadata.lufsLevel,
       }
     })
-    
+
     await updateTrackStatus(job.trackId, 'completed', 100)
-    
+
     return {
       status: 'completed',
       progress: 100,
@@ -70,7 +70,7 @@ export async function processAudioFile(job: AudioProcessingJob): Promise<Process
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    
+
     await prisma.track.update({
       where: { id: job.trackId },
       data: {
@@ -78,7 +78,7 @@ export async function processAudioFile(job: AudioProcessingJob): Promise<Process
         processingError: errorMessage
       }
     })
-    
+
     return {
       status: 'failed',
       error: errorMessage
@@ -94,19 +94,20 @@ async function downloadFromS3(key: string): Promise<Buffer> {
     Bucket: env.AWS_S3_BUCKET_NAME,
     Key: key,
   })
-  
+
   const response = await s3.send(command)
-  
+
   if (!response.Body) {
     throw new Error('No data received from S3')
   }
-  
+
   // Convert stream to buffer
   const chunks: Uint8Array[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for await (const chunk of response.Body as any) {
     chunks.push(chunk)
   }
-  
+
   return Buffer.concat(chunks)
 }
 
@@ -120,7 +121,7 @@ async function uploadToS3(key: string, buffer: Buffer, contentType: string): Pro
     Body: buffer,
     ContentType: contentType,
   })
-  
+
   await s3.send(command)
 }
 
@@ -149,7 +150,7 @@ let isProcessing = false
 
 export async function queueAudioProcessing(job: AudioProcessingJob): Promise<void> {
   processingQueue.push(job)
-  
+
   // Start processing if not already running
   if (!isProcessing) {
     processQueue()
@@ -164,10 +165,10 @@ async function processQueue(): Promise<void> {
     isProcessing = false
     return
   }
-  
+
   isProcessing = true
   const job = processingQueue.shift()
-  
+
   if (job) {
     try {
       await processAudioFile(job)
@@ -175,7 +176,7 @@ async function processQueue(): Promise<void> {
       console.error('Error processing audio job:', error)
     }
   }
-  
+
   // Process next job
   setTimeout(() => processQueue(), 100)
 }
@@ -192,13 +193,13 @@ export async function getProcessingStatus(trackId: string): Promise<ProcessingSt
       processingError: true,
     }
   })
-  
+
   if (!track) {
     return null
   }
-  
+
   return {
-    status: track.processingStatus as any,
+    status: track.processingStatus as ProcessingStatus['status'],
     progress: track.processingProgress || 0,
     error: track.processingError || undefined,
   }

@@ -8,7 +8,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     // Get upcoming live sessions
-    const sessions = await prisma.liveSession.findMany({
+    const sessions = await prisma.session.findMany({
       where: {
         status: 'SCHEDULED',
         scheduledAt: {
@@ -22,6 +22,9 @@ export async function GET() {
             artistName: true,
             email: true
           }
+        },
+        _count: {
+          select: { rsvps: true }
         }
       },
       orderBy: {
@@ -31,16 +34,15 @@ export async function GET() {
     })
 
     return NextResponse.json({
-      sessions: sessions.map((s: any) => ({
+      sessions: sessions.map((s) => ({
         id: s.id,
         artistId: s.creatorId,
         artistName: s.creator.artistName || s.creator.email,
-        title: s.title,
-        description: s.description,
         scheduledAt: s.scheduledAt.toISOString(),
-        rsvpPrice: s.rsvpPrice,
+        rsvpPrice: s.rsvpPriceCoins,
         maxAttendees: s.maxAttendees,
-        currentAttendees: s.currentAttendees,
+        currentAttendees: s.attendees,
+        rsvpCount: s._count.rsvps,
         status: s.status
       })),
       totalCount: sessions.length

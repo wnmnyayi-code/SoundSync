@@ -6,13 +6,13 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ToastProvider } from '@/components/ui/toast-provider'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ToastProvider>
-      <ErrorBoundary>
-        **<>**
-          {children}
-        **</>**
-      </ErrorBoundary>
-    </ToastProvider>
-  )
+  return (
+    <ToastProvider>
+      <ErrorBoundary>
+        <>
+          {children}
+        </>
+      </ErrorBoundary>
+    </ToastProvider>
+  )
 }

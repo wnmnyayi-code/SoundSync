@@ -1,3 +1,5 @@
 {
-    "codium.codeCompletion.enable": true
+    "codium.codeCompletion.enable": true,
+    "codemaker.apiKey": "cm-8LLcr229Y9lJXDwJ7hygDY6iwtbgmWd4SFAf5S2aILDsB4Sbd8b29xUFSD86ZhPa",
+    "chatgpt.openOnStartup": true
 }
