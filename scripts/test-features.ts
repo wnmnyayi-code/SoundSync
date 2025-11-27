@@ -119,28 +119,7 @@ async function testAudioProcessing() {
     }
 }
 
-async function testStripeIntegration() {
-    log('\n🔍 Testing Stripe Integration...', colors.blue)
 
-    if (!process.env.STRIPE_SECRET_KEY) {
-        log('⚠️  Stripe not configured. Skipping Stripe test.', colors.yellow)
-        return false
-    }
-
-    try {
-        const stripe = (await import('stripe')).default
-        const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!)
-
-        // Test API connection
-        const balance = await stripeClient.balance.retrieve()
-        log(`✅ Stripe connected! Available balance: ${balance.available[0]?.amount || 0}`, colors.green)
-
-        return true
-    } catch (error) {
-        log(`❌ Stripe connection failed: ${error}`, colors.red)
-        return false
-    }
-}
 
 async function checkEnvironmentVariables() {
     log('\n🔍 Checking Environment Variables...', colors.blue)
@@ -155,7 +134,8 @@ async function checkEnvironmentVariables() {
         'AWS_ACCESS_KEY_ID',
         'AWS_SECRET_ACCESS_KEY',
         'AWS_S3_BUCKET_NAME',
-        'STRIPE_SECRET_KEY',
+        'PAYFAST_MERCHANT_ID',
+        'PAYFAST_MERCHANT_KEY',
         'SMTP_HOST',
         'SMTP_USER',
     ]
@@ -195,7 +175,7 @@ async function runAllTests() {
         s3: await testS3Upload(),
         email: await testEmailSystem(),
         audio: await testAudioProcessing(),
-        stripe: await testStripeIntegration(),
+
     }
 
     log('\n═══════════════════════════════════════', colors.blue)

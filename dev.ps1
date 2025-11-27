@@ -14,4 +14,4 @@ if (-not (Test-Path "C:\Temp")) {
 }
 
 # Run Next.js dev server directly using node
-& node "node_modules\next\dist\bin\next" dev -p 3008
+& node "node_modules\next\dist\bin\next" dev -p 3000

@@ -2,43 +2,59 @@
   "Name": "Soundsync-DRM",
   "Description": "Encrypt streams with Widevine and FairPlay",
   "Settings": {
-    "Inputs": [{
-      "FileInput": "s3://YOUR-BUCKET/temp-streams/input.mp3",
-      "AudioSelectors": {
-        "Audio Selector 1": { "DefaultSelection": "DEFAULT" }
-      }
-    }],
-    "OutputGroups": [{
-      "Name": "DRM Protected",
-      "OutputGroupSettings": {
-        "Type": "HLS_GROUP_SETTINGS",
-        "HlsGroupSettings": {
-          "SegmentLength": 10,
-          "Destination": "s3://YOUR-BUCKET/encrypted/"
-        }
-      },
-      "Outputs": [{
-        "AudioDescriptions": [{
-          "CodecSettings": {
-            "Codec": "AAC",
-            "AacSettings": { "Bitrate": 128000 }
+    "Inputs": [
+      {
+        "FileInput": "s3://YOUR-BUCKET/temp-streams/input.mp3",
+        "AudioSelectors": {
+          "Audio Selector 1": {
+            "DefaultSelection": "DEFAULT"
           }
-        }],
-        "OutputSettings": { "HlsSettings": {} },
-        "ContainerSettings": { "Container": "M3U8"},
-        "Extension": "m3u8"
-      }]
-    }],
+        }
+      }
+    ],
+    "OutputGroups": [
+      {
+        "Name": "DRM Protected",
+        "OutputGroupSettings": {
+          "Type": "HLS_GROUP_SETTINGS",
+          "HlsGroupSettings": {
+            "SegmentLength": 10,
+            "Destination": "s3://YOUR-BUCKET/encrypted/"
+          }
+        },
+        "Outputs": [
+          {
+            "AudioDescriptions": [
+              {
+                "CodecSettings": {
+                  "Codec": "AAC",
+                  "AacSettings": {
+                    "Bitrate": 128000
+                  }
+                }
+              }
+            ],
+            "OutputSettings": {
+              "HlsSettings": {}
+            },
+            "ContainerSettings": {
+              "Container": "M3U8"
+            },
+            "Extension": "m3u8"
+          }
+        ]
+      }
+    ],
     "Encryption": {
       "EncryptionType": "DRM_ENCRYPTION",
       "DrmEncryption": {
         "SpekeKeyProvider": {
           "ResourceId": "soundsync-session",
           "SystemIds": [
-            "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed", // Widevine
-            "94ce86fb-07ff-4f43-adb8-93d2fa968ca2"  // FairPlay
+            "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",
+            "94ce86fb-07ff-4f43-adb8-93d2fa968ca2"
           ],
-          "Url": "https://drmsoundsync.keyos.com/hms/speke/v1.0/copyProtection", // DRM provider
+          "Url": "https://drmsoundsync.keyos.com/hms/speke/v1.0/copyProtection",
           "RoleArn": "arn:aws:iam::YOUR-ACCOUNT:role/SpekeAccess"
         }
       }

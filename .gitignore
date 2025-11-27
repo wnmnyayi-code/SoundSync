@@ -85,3 +85,8 @@ test-connection.ts
 test-db.ts
 fix.txt
 env_fix.txt
+
+.vercel
+.env*.local
+
+/generated/prisma

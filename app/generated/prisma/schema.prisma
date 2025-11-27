@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../app/generated/prisma"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -105,19 +105,19 @@ model VerificationRequest {
 }
 
 model Track {
-  id            String   @id @default(uuid()) @db.Uuid
+  id            String          @id @default(uuid()) @db.Uuid
   title         String
   description   String?
   url           String
   duration      Int
   genre         String?
-  isPublic      Boolean  @default(true)
-  plays         Int      @default(0)
-  likes         Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String   @db.Uuid
-  user          User     @relation(fields: [userId], references: [id])
+  isPublic      Boolean         @default(true)
+  plays         Int             @default(0)
+  likes         Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  userId        String          @db.Uuid
+  user          User            @relation(fields: [userId], references: [id])
   playlists     PlaylistTrack[]
   comments      Comment[]
   likesRelation Like[]
@@ -128,14 +128,14 @@ model Track {
 }
 
 model Playlist {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String          @id @default(uuid()) @db.Uuid
   name        String
   description String?
-  isPublic    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String   @db.Uuid
-  user        User     @relation(fields: [userId], references: [id])
+  isPublic    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  userId      String          @db.Uuid
+  user        User            @relation(fields: [userId], references: [id])
   tracks      PlaylistTrack[]
 
   @@index([userId])

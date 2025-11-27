@@ -26,10 +26,11 @@ const envSchema = z.object({
   DEFAULT_ADMIN_EMAIL: z.string().email().optional(),
   DEFAULT_ADMIN_PASSWORD: z.string().optional(),
 
-  // Stripe (optional)
-  STRIPE_SECRET_KEY: z.string().optional(),
-  STRIPE_PUBLISHABLE_KEY: z.string().optional(),
-  STRIPE_CONNECTED_ACCOUNT_ID: z.string().optional(),
+  // PayFast (optional)
+  PAYFAST_MERCHANT_ID: z.string().optional(),
+  PAYFAST_MERCHANT_KEY: z.string().optional(),
+  PAYFAST_PASSPHRASE: z.string().optional(),
+  PAYFAST_HOST: z.string().optional(),
 
   // Optional other vars
   EXCHANGE_RATE_API_URL: z.string().optional(),
