@@ -1,0 +1,530 @@
+===========================================
+SOUNDSYNC - DESIGN, LAYOUT & STYLE GUIDE
+===========================================
+
+1. DESIGN PHILOSOPHY
+
+SoundSync's design embodies a modern, music-focused aesthetic that balances professionalism with creativity. The platform uses a dark theme with vibrant purple and pink accents to create an immersive, premium music experience.
+
+Core Design Principles:
+- Music-first visual hierarchy
+- Clean, uncluttered interfaces
+- Smooth animations and transitions
+- Accessibility and readability
+- Mobile-responsive design
+- Performance-optimized
+
+===========================================
+
+2. COLOR SCHEME
+
+2.1 PRIMARY COLORS
+
+Background Colors:
+- Primary Background: hsl(270, 20%, 8%) - Deep purple-black
+- Secondary Background: hsl(270, 25%, 12%) - Slightly lighter purple-black
+- Card Background: hsl(270, 25%, 12%) - Card surfaces
+
+Foreground Colors:
+- Primary Foreground: hsl(270, 10%, 98%) - Off-white text
+- Muted Foreground: hsl(270, 10%, 65%) - Secondary text
+
+2.2 ACCENT COLORS
+
+Primary Accent:
+- Primary: hsl(270, 70%, 60%) - Vibrant purple
+- Primary Foreground: hsl(270, 10%, 98%) - White text on primary
+
+Secondary Accent:
+- Secondary: hsl(280, 50%, 50%) - Deep purple
+- Accent: hsl(290, 80%, 65%) - Bright pink-purple
+
+Utility Colors:
+- Destructive: hsl(0, 70%, 55%) - Red for errors
+- Muted: hsl(270, 20%, 20%) - Muted backgrounds
+- Border: hsl(270, 20%, 25%) - Border color
+- Input: hsl(270, 20%, 20%) - Input backgrounds
+
+2.3 GRADIENTS
+
+Primary Gradient:
+- linear-gradient(135deg, hsl(270 70% 60%), hsl(290 80% 65%))
+- Used for: Buttons, headers, highlights
+
+Dark Gradient:
+- linear-gradient(180deg, hsl(270 25% 12%), hsl(270 20% 8%))
+- Used for: Backgrounds, sections
+
+Glow Gradient:
+- radial-gradient(circle at center, hsl(270 70% 60% / 0.2), transparent)
+- Used for: Hover effects, focus states
+
+Background Overlay Gradients:
+- Dark: hsl(220, 40%, 10%)
+- Purple: hsl(270, 50%, 20%)
+- Pink: hsl(320, 60%, 30%)
+- Combined in multi-layer gradient overlay
+
+2.4 ROLE-SPECIFIC COLORS
+
+Artist Role:
+- Gradient: from-purple-500 to-pink-500
+- Icon background: Purple to pink gradient
+
+Fan Role:
+- Gradient: from-blue-500 to-cyan-500
+- Icon background: Blue to cyan gradient
+
+Merchant Role:
+- Gradient: from-green-500 to-emerald-500
+- Icon background: Green to emerald gradient
+
+Influencer Role:
+- Gradient: from-orange-500 to-red-500
+- Icon background: Orange to red gradient
+
+===========================================
+
+3. TYPOGRAPHY
+
+3.1 FONT FAMILY
+
+Primary Font: Inter
+- Used for: All text content
+- Weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold), 900 (black)
+- Source: Google Fonts
+- Fallback: system-ui, sans-serif
+
+3.2 TEXT SIZES
+
+Headings:
+- h1: text-5xl md:text-7xl (48px / 72px) - Hero titles
+- h2: text-4xl (36px) - Section titles
+- h3: text-3xl (30px) - Subsection titles
+- h4: text-2xl (24px) - Card titles
+- h5: text-xl (20px) - Small headings
+- h6: text-lg (18px) - Smallest headings
+
+Body Text:
+- Large: text-xl (20px) - Intro paragraphs
+- Regular: text-base (16px) - Body text
+- Small: text-sm (14px) - Secondary text
+- Extra Small: text-xs (12px) - Captions, labels
+
+3.3 TEXT STYLES
+
+Font Weights:
+- Regular: font-normal (400) - Body text
+- Medium: font-medium (500) - Emphasized text
+- Semibold: font-semibold (600) - Subheadings
+- Bold: font-bold (700) - Headings
+- Black: font-black (900) - Hero text
+
+Text Effects:
+- Text Glow: text-shadow: 0 0 20px hsl(270 70% 60% / 0.5)
+- Used for: Hero headings, important CTAs
+
+===========================================
+
+4. LAYOUT SYSTEM
+
+4.1 GRID SYSTEM
+
+Container Widths:
+- max-w-4xl: 896px - Standard content
+- max-w-5xl: 1024px - Wide content
+- max-w-6xl: 1152px - Extra wide content
+- container mx-auto: Centered responsive container
+
+Grid Layouts:
+- grid-cols-1: Mobile (1 column)
+- md:grid-cols-2: Tablet (2 columns)
+- lg:grid-cols-3: Desktop (3 columns)
+- lg:grid-cols-4: Wide desktop (4 columns)
+
+4.2 SPACING SYSTEM
+
+Padding:
+- p-4: 16px - Small padding
+- p-6: 24px - Medium padding
+- p-8: 32px - Large padding
+- p-12: 48px - Extra large padding
+
+Margins:
+- mb-4: 16px - Small margin
+- mb-6: 24px - Medium margin
+- mb-8: 32px - Large margin
+- mb-12: 48px - Extra large margin
+
+Gaps:
+- gap-4: 16px - Small gap
+- gap-6: 24px - Medium gap
+- gap-8: 32px - Large gap
+
+4.3 RESPONSIVE BREAKPOINTS
+
+Tailwind Breakpoints:
+- sm: 640px - Small devices
+- md: 768px - Medium devices
+- lg: 1024px - Large devices
+- xl: 1280px - Extra large devices
+- 2xl: 1536px - 2X large devices
+
+Common Patterns:
+- flex flex-col sm:flex-row - Stack on mobile, row on desktop
+- grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 - Responsive grid
+- text-base md:text-lg lg:text-xl - Responsive text
+
+===========================================
+
+5. COMPONENT STYLES
+
+5.1 BUTTONS
+
+Primary Button:
+- Class: gradient-primary text-white hover:opacity-90 shadow-glow
+- Background: Purple to pink gradient
+- Text: White
+- Hover: Slight opacity reduction
+- Shadow: Glow effect
+
+Outline Button:
+- Class: border-border text-foreground hover:bg-card
+- Border: Border color
+- Text: Foreground color
+- Hover: Card background
+- Background: Transparent
+
+Ghost Button:
+- Class: hover:bg-accent/10
+- Background: Transparent
+- Hover: Accent with 10% opacity
+- No border
+
+Button Sizes:
+- sm: Small buttons
+- md: Default size
+- lg: Large buttons
+
+5.2 CARDS
+
+Standard Card:
+- Class: bg-card border-border shadow-card
+- Background: Card background color
+- Border: Border color
+- Shadow: Card shadow effect
+- Rounded: rounded-lg (8px)
+
+Hover Card:
+- Class: hover:shadow-glow transition-all
+- Adds glow shadow on hover
+- Smooth transition
+
+Featured Card:
+- Class: ring-2 ring-primary shadow-glow
+- Purple ring border
+- Glow shadow
+- Stands out from other cards
+
+5.3 INPUTS
+
+Text Input:
+- Background: hsl(270, 20%, 20%)
+- Border: hsl(270, 20%, 25%)
+- Text: hsl(270, 10%, 98%)
+- Placeholder: hsl(270, 10%, 65%)
+- Focus: Ring with primary color
+- Height: h-10 (40px)
+
+Textarea:
+- Same styling as text input
+- Minimum height: varies by use
+- Resizable: vertical only
+
+Select Dropdown:
+- Same styling as text input
+- Chevron icon on right
+- Custom dropdown styling
+
+5.4 NAVIGATION
+
+Main Navigation:
+- Background: backdrop-blur-glow (blurred background)
+- Sticky positioning
+- Border bottom: border-border
+- Shadow: shadow-card
+
+Navigation Links:
+- Default: text-muted-foreground
+- Hover: text-foreground
+- Active: text-primary
+- Transition: smooth color change
+
+Mobile Menu:
+- Hamburger icon
+- Slide-in drawer
+- Full-screen overlay
+- Close button
+
+5.5 MODALS & DIALOGS
+
+Modal Overlay:
+- Background: hsl(270 20% 8% / 0.8)
+- Backdrop blur: blur(20px)
+- Full screen coverage
+- Click to close
+
+Modal Content:
+- Background: bg-card
+- Border: border-border
+- Shadow: shadow-glow
+- Rounded: rounded-2xl (16px)
+- Max width: max-w-2xl
+- Centered: mx-auto
+
+Dialog Header:
+- Border bottom: border-border
+- Padding: p-6
+- Close button: top-right
+
+Dialog Footer:
+- Border top: border-border
+- Padding: p-6
+- Buttons: right-aligned
+
+===========================================
+
+6. VISUAL EFFECTS
+
+6.1 SHADOWS
+
+Card Shadow:
+- box-shadow: 0 10px 30px -10px hsl(270 70% 20% / 0.5)
+- Used for: Cards, elevated elements
+
+Glow Shadow:
+- box-shadow: 0 0 40px hsl(270 70% 60% / 0.3)
+- Used for: Buttons, featured cards, hover states
+
+6.2 ANIMATIONS
+
+Transitions:
+- transition-all: All properties
+- transition-colors: Color changes
+- transition-transform: Transform changes
+- Duration: 200-300ms (default)
+
+Hover Effects:
+- Scale: hover:scale-110 (10% larger)
+- Opacity: hover:opacity-90 (90% opacity)
+- Shadow: hover:shadow-glow (add glow)
+- Border: hover:border-primary/50 (primary border)
+
+Loading States:
+- Spinner animation
+- Pulse effect: animate-pulse
+- Skeleton loaders
+
+6.3 BACKDROP EFFECTS
+
+Backdrop Blur:
+- backdrop-filter: blur(20px)
+- Used for: Navigation, modals, overlays
+
+Background Blend:
+- mix-blend-mode: multiply
+- Used for: Background overlays
+- Creates depth and atmosphere
+
+===========================================
+
+7. ICONOGRAPHY
+
+7.1 ICON LIBRARY
+
+Primary Library: Lucide React
+- Consistent style
+- Customizable size and color
+- Optimized SVGs
+- Tree-shakeable
+
+Common Icon Sizes:
+- w-4 h-4 (16px): Small icons in text
+- w-5 h-5 (20px): Regular icons
+- w-6 h-6 (24px): Medium icons
+- w-8 h-8 (32px): Large icons
+- w-12 h-12 (48px): Hero icons
+
+Icon Colors:
+- text-primary: Primary accent
+- text-accent: Secondary accent
+- text-muted-foreground: Muted icons
+- text-foreground: Default icons
+
+7.2 ROLE ICONS
+
+Artist: Music icon
+Fan: Users icon
+Merchant: ShoppingBag icon
+Influencer: TrendingUp icon
+
+Feature Icons:
+- Upload: Upload icon
+- Stream: Radio icon
+- Coins: Coins icon
+- Live: Radio icon with pulse
+- Settings: Settings icon
+- Analytics: BarChart icon
+
+===========================================
+
+8. BACKGROUND DESIGN
+
+8.1 MAIN BACKGROUND
+
+Base Layer:
+- Gradient: linear-gradient(135deg, hsl(270 25% 12%), hsl(270 20% 8%))
+- Creates depth and atmosphere
+
+Image Layer (::before):
+- Background image: /backgrounds/music-waves-bg.jpg
+- Opacity: 0.4
+- Fixed attachment
+- Cover size
+- Centered position
+
+Color Blend Overlay (::after):
+- Multi-layer gradient
+- Dark to purple to pink
+- Mix-blend-mode: multiply
+- Creates cohesive color theme
+
+8.2 SECTION BACKGROUNDS
+
+Hero Section:
+- Additional radial gradient
+- Ellipse at top
+- Purple to pink fade
+- Transparent bottom
+
+Card Sections:
+- bg-card/50: Semi-transparent cards
+- Creates layering effect
+- Maintains readability
+
+===========================================
+
+9. RESPONSIVE DESIGN
+
+9.1 MOBILE FIRST
+
+Approach:
+- Design for mobile first
+- Progressive enhancement
+- Touch-friendly targets (min 44px)
+- Readable text sizes (min 16px)
+
+Mobile Optimizations:
+- Single column layouts
+- Stacked navigation
+- Full-width buttons
+- Simplified interactions
+
+9.2 TABLET ADAPTATIONS
+
+Layout Changes:
+- 2-column grids
+- Side-by-side elements
+- Larger touch targets
+- More whitespace
+
+Navigation:
+- Horizontal navigation
+- Dropdown menus
+- Tablet-optimized spacing
+
+9.3 DESKTOP ENHANCEMENTS
+
+Layout:
+- Multi-column grids (3-4 columns)
+- Sidebar navigation
+- Hover effects
+- Larger content areas
+
+Interactions:
+- Mouse hover states
+- Keyboard navigation
+- Tooltips
+- Context menus
+
+===========================================
+
+10. ACCESSIBILITY
+
+10.1 COLOR CONTRAST
+
+Text Contrast:
+- Foreground on background: 15:1 (AAA)
+- Muted text on background: 4.5:1 (AA)
+- Primary on background: 7:1 (AAA)
+
+Interactive Elements:
+- Buttons: 4.5:1 minimum
+- Links: 4.5:1 minimum
+- Form inputs: 4.5:1 minimum
+
+10.2 FOCUS STATES
+
+Keyboard Focus:
+- Ring: ring-2 ring-primary
+- Offset: ring-offset-2
+- Visible on all interactive elements
+
+Focus Indicators:
+- Buttons: Outline ring
+- Links: Underline + ring
+- Inputs: Border + ring
+
+10.3 ARIA LABELS
+
+Screen Reader Support:
+- Proper heading hierarchy
+- Alt text for images
+- ARIA labels for icons
+- Descriptive link text
+
+Semantic HTML:
+- nav, header, main, footer
+- article, section, aside
+- button, a, input elements
+- Proper form labels
+
+===========================================
+
+11. BRAND ASSETS
+
+11.1 LOGO
+
+Primary Logo:
+- Text: "SoundSync"
+- Font: Inter Bold
+- Gradient: Primary gradient
+- Used in: Navigation, marketing
+
+Logo Variations:
+- Full color (primary)
+- White (on dark backgrounds)
+- Black (on light backgrounds)
+- Icon only (mobile)
+
+11.2 BRAND COLORS
+
+Official Palette:
+- Primary Purple: #9333ea
+- Primary Pink: #d946ef
+- Dark Background: #0f0a1a
+- Light Text: #f5f3ff
+
+===========================================
+END OF DOCUMENT
+===========================================

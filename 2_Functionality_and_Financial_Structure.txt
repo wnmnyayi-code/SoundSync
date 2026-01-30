@@ -1,0 +1,419 @@
+===========================================
+SOUNDSYNC - FUNCTIONALITY & FINANCIAL STRUCTURE
+===========================================
+
+1. PLATFORM FUNCTIONALITY
+
+1.1 ARTIST FEATURES (CREATOR ROLE)
+
+Music Upload & Management:
+- Upload tracks: MP3, WAV, FLAC (max 100MB)
+- Automatic metadata extraction (title, genre, BPM, key)
+- Audio processing pipeline:
+  * File validation
+  * Loudness normalization (LUFS targeting)
+  * Mastering (Gentle/Moderate/Aggressive presets)
+  * Format conversion (MP3 320kbps or FLAC lossless)
+  * S3 storage with CDN delivery
+- DRM protection options (Widevine, FairPlay)
+- Public/private visibility controls
+- Track pricing in coins
+
+Audio Settings Configuration:
+- Mastering presets: Gentle, Moderate, Aggressive
+- Target LUFS: -18 to -10 (default -14)
+- Loudness normalization: On/Off
+- Audio mastering: On/Off
+- Output format: MP3 (320kbps) or FLAC (lossless)
+
+Live Listening Parties:
+- Schedule future sessions
+- Set RSVP price in coins
+- Define maximum attendees
+- Real-time audio streaming
+- Live chat functionality
+- Tip collection during sessions
+- Session analytics
+
+Playlist Management:
+- Create unlimited playlists
+- Public/private playlists
+- Collaborative playlists (future)
+- Playlist sharing on social media
+
+Social Media Integration:
+- Connect: Facebook, Twitter, Instagram, TikTok, YouTube
+- Manual profile links
+- WhatsApp Business integration
+- Browser extensions for sharing
+- Auto-posting capabilities
+
+Revenue & Analytics:
+- Real-time earnings tracking
+- Stream counts and trends
+- Follower growth metrics
+- Geographic distribution
+- Top tracks performance
+- Withdrawal management (R1000 minimum)
+
+1.2 FAN FEATURES
+
+Music Discovery:
+- Browse all public tracks
+- Search by artist, genre, title
+- Curated playlists
+- Trending tracks
+- New releases
+
+Streaming:
+- High-quality audio playback
+- Queue management
+- Repeat and shuffle
+- Background playback (mobile)
+- Offline downloads (mobile, purchased tracks)
+
+Live Sessions:
+- Discover scheduled sessions
+- RSVP with coins
+- Attend live listening parties
+- Real-time chat
+- Tip artists during sessions
+
+Coin Management:
+- Purchase coin packages (R10/R25/R50)
+- Custom amounts available
+- Secure Stripe payments
+- Transaction history
+- Coin balance tracking
+
+Artist Support:
+- Direct tipping
+- Track purchases
+- Merchandise purchases
+- Follow favorite artists
+- Share on social media
+
+Playlist Creation:
+- Create personal playlists
+- Add tracks from any artist
+- Share playlists
+- Collaborative playlists (future)
+
+1.3 MERCHANT FEATURES
+
+Product Management:
+- List physical products (equipment, instruments)
+- List digital products (VST plugins, samples, software)
+- Product descriptions and images
+- Pricing and inventory control
+- Category organization
+
+Delivery Configuration:
+- Set delivery radius for physical items
+- Nationwide digital delivery
+- Shipping cost calculator
+- Delivery time estimates
+
+Sales & Orders:
+- Order management dashboard
+- Customer communication
+- Order fulfillment tracking
+- Returns and refunds handling
+
+Analytics:
+- Sales volume tracking
+- Revenue trends
+- Product performance
+- Customer demographics
+- Conversion rates
+
+Product Categories:
+- DJ Equipment & Controllers
+- Audio Interfaces & Mixers
+- Studio Monitors & Headphones
+- Microphones & Accessories
+- VST Plugins & Software
+- Sample Packs & Loops
+- MIDI Controllers
+- Music Production Courses
+- Sound Effects Libraries
+- Mixing & Mastering Presets
+
+1.4 INFLUENCER FEATURES
+
+Referral System:
+- Unique referral links for artists
+- Unique referral links for products
+- Track link performance
+- QR code generation
+
+Analytics Dashboard:
+- Real-time referral tracking
+- Conversion rates
+- Commission earnings
+- Top performing links
+- Audience insights
+- Geographic data
+
+Promotional Tools:
+- Pre-made graphics
+- Social media templates
+- Artist promotional materials
+- Campaign management
+
+Commission Tracking:
+- Real-time earnings
+- Transaction history
+- Pending commissions
+- Withdrawal management (R1000 minimum)
+
+Performance Bonuses:
+- Top performer rewards
+- Monthly challenges
+- Tier-based bonuses
+- Special promotions
+
+===========================================
+
+2. FINANCIAL STRUCTURE
+
+2.1 REVENUE DISTRIBUTION MODEL
+
+Standard Transaction (R100 spent by fan):
+- Artist: R60.00 (60%)
+- Influencer: R10.00 (10%) - if referred
+- Platform: R15.00 (15%)
+- VAT: R0.00 (currently disabled)
+- Total: R100.00
+
+Without Influencer Referral:
+- Artist: R60.00 (60%)
+- Platform: R25.00 (25%)
+- VAT: R0.00 (currently disabled)
+- Remaining: R15.00 (redistributed to platform)
+
+2.2 COIN ECONOMY
+
+Official Coin Packages:
+- R10 = 200 coins (R0.05 per coin)
+- R25 = 500 coins (R0.05 per coin)
+- R50 = 1000 coins (R0.05 per coin)
+
+Custom Amounts:
+- Minimum: R10
+- Maximum: R10,000 per transaction
+- Same rate: R0.05 per coin
+
+Coin Usage:
+- Tip artists (any amount)
+- RSVP for live sessions (set by artist)
+- Purchase tracks (set by artist)
+- Buy merchandise (set by merchant)
+- Access premium content
+
+2.3 SUBSCRIPTION PRICING
+
+BASIC TIER (Free):
+- Access: 1 user role
+- Features: Basic platform features
+- Support: Community support
+- Analytics: Basic stats
+- Cost: R0/month
+
+STANDARD TIER (R99/month):
+- Access: 2 user roles
+- Features: Advanced features
+- Support: Priority support
+- Analytics: Enhanced analytics
+- Early Access: New features
+- Cost: R99/month
+
+PREMIUM TIER (R199/month):
+- Access: All 4 user roles
+- Features: Premium features
+- Support: VIP support
+- Analytics: Advanced analytics
+- Early Access: Beta features
+- Bonuses: Performance rewards
+- Cost: R199/month
+
+2.4 MERCHANT COMMISSION STRUCTURE
+
+Sales Revenue Split:
+- Merchant: 90% of sale price
+- Platform: 10% commission
+
+Example: R1000 Product Sale
+- Merchant receives: R900
+- Platform receives: R100
+
+No Additional Fees:
+- No listing fees
+- No monthly fees
+- No transaction fees (beyond 10%)
+- No withdrawal fees
+
+2.5 WITHDRAWAL SYSTEM
+
+Minimum Thresholds:
+- Artists: R1000
+- Influencers: R1000
+- Merchants: R1000
+
+Processing Timeline:
+- Withdrawal request: Instant
+- Platform processing: 24-48 hours
+- Bank transfer: 1-3 business days
+- Total time: 2-5 business days
+
+Withdrawal Methods:
+- South African bank transfer (primary)
+- International wire transfer
+- PayPal (coming soon)
+
+Withdrawal Fees:
+- South African banks: Free
+- International transfer: Bank fees apply
+- PayPal: 2.5% + R5 (when available)
+
+2.6 PAYMENT PROCESSING
+
+Payment Gateway: Stripe
+- PCI DSS compliant
+- Secure card processing
+- Multiple currency support
+- Fraud detection
+- 3D Secure authentication
+
+Accepted Payment Methods:
+- Credit cards (Visa, Mastercard, Amex)
+- Debit cards
+- Bank transfers
+- Mobile money (coming soon)
+
+Transaction Security:
+- SSL encryption
+- Tokenized card storage
+- No card details stored on platform
+- Automated fraud detection
+
+2.7 TAX STRUCTURE (CURRENTLY DISABLED)
+
+VAT Status:
+- VAT Rate: 15% (South Africa standard)
+- Current Status: DISABLED
+- Implementation: Future phase
+
+When VAT is enabled:
+- Will be added to all transactions
+- Collected by platform
+- Remitted to SARS
+- Separate line item on invoices
+
+SARS Compliance:
+- Artists: Optional SAMBRO number
+- Merchants: Mandatory SARS clearance certificate
+- Platform: Registered VAT vendor (when enabled)
+
+===========================================
+
+3. DISABLED/FUTURE FEATURES
+
+3.1 CURRENTLY DISABLED
+
+Tax/VAT System:
+- Status: Disabled in code
+- Reason: Simplification for launch
+- Future: Will be enabled with proper SARS integration
+
+Follow System:
+- Status: Placeholder in code
+- Reason: Social features in development
+- Future: Full follower/following system
+
+OAuth Social Login:
+- Status: Coming soon
+- Reason: Manual links working first
+- Future: Full OAuth for all platforms
+
+App Store Distribution:
+- Status: Apps ready, not yet published
+- Reason: Awaiting approval
+- Future: Q1 2025 launch
+
+3.2 PLANNED FEATURES (ROADMAP)
+
+Q1 2025:
+- App Store releases (iOS & Android)
+- Enhanced live streaming features
+- Advanced analytics dashboard
+- Playlist algorithms
+- Social features expansion
+
+Q2 2025:
+- AI-powered music recommendations
+- Collaborative playlists
+- Artist collaboration tools
+- Advanced DRM implementation
+- International market expansion
+
+Q3 2025:
+- NFT integration for exclusive content
+- Blockchain payment options
+- Virtual concert experiences
+- AR/VR music experiences
+- Global marketplace expansion
+
+Q4 2025:
+- White-label solutions for labels
+- API for third-party integrations
+- Advanced creator tools
+- Enterprise features
+- Multi-language support
+
+===========================================
+
+4. FINANCIAL REQUIREMENTS
+
+4.1 ARTIST REQUIREMENTS
+
+Registration:
+- Artist name (required)
+- Artist status: Independent/Signed/Registered
+- SAMBRO number (optional)
+- SARS clearance (optional)
+
+Verification:
+- Email verification (required)
+- Phone verification (optional)
+- Identity verification (for withdrawals)
+
+4.2 MERCHANT REQUIREMENTS
+
+Registration:
+- Business name (required)
+- SARS clearance certificate (mandatory)
+- Business registration documents
+- Tax information
+
+Verification:
+- Business verification (required)
+- Bank account verification (required)
+- Identity verification (required)
+
+4.3 INFLUENCER REQUIREMENTS
+
+Registration:
+- Social media profiles (required)
+- Minimum followers: 1,000 combined (recommended)
+- Engagement metrics
+- Content portfolio
+
+Verification:
+- Email verification (required)
+- Social media verification (required)
+- Identity verification (for withdrawals)
+
+===========================================
+END OF DOCUMENT
+===========================================

@@ -1,0 +1,78 @@
+===========================================
+SOUNDSYNC - FULL CONCEPT & VISION
+===========================================
+
+1. WHAT IS SOUNDSYNC?
+
+SoundSync is a comprehensive music platform connecting four key user groups:
+- Artists: Upload music, host live sessions, earn 60% revenue
+- Fans: Stream music, attend live parties, support artists
+- Merchants: Sell music equipment and digital products, keep 90%
+- Influencers: Promote artists, earn 10% commission on referrals
+
+2. CORE MISSION
+
+Empowering artists to monetize their music while building authentic connections with fans, supported by a thriving marketplace and influencer network.
+
+3. KEY FEATURES
+
+Music Streaming:
+- Upload MP3, WAV, FLAC (max 100MB)
+- Automated audio mastering (Gentle/Moderate/Aggressive presets)
+- LUFS normalization (-14 LUFS standard)
+- DRM protection options
+- Public/private visibility controls
+
+Live Listening Parties:
+- Schedule live sessions
+- RSVP system with coin-based entry
+- Real-time streaming from phone storage
+- Maximum attendee controls
+- Live chat and tipping
+
+Coin Economy:
+- R10 = 200 coins
+- R25 = 500 coins
+- R50 = 1000 coins
+- Use for tips, RSVPs, purchases
+
+Subscription Tiers:
+- Basic (Free): 1 role, basic features
+- Standard (R99/mo): 2 roles, advanced features
+- Premium (R199/mo): All 4 roles, premium features
+
+4. REVENUE MODEL
+
+Distribution per R100 spent:
+- Artist: R60 (60%)
+- Influencer: R10 (10%)
+- Platform: R15 (15%)
+- VAT: R0 (currently disabled)
+
+Withdrawal minimums: R1000 for all roles
+Processing time: 24-48 hours
+
+5. TECHNOLOGY STACK
+
+- Frontend: Next.js 15, React 19, TypeScript, Tailwind v4
+- Backend: Next.js API Routes, NextAuth, Prisma, PostgreSQL
+- Storage: AWS S3, CloudFront CDN
+- Payments: Stripe integration
+- Audio: FFmpeg processing
+
+6. MOBILE APPS
+
+iOS & Android apps available:
+- Offline playback
+- Background streaming
+- Push notifications
+- Native performance
+- App Store/Play Store: Coming Soon
+- Direct downloads: Available now
+
+7. SOCIAL INTEGRATION
+
+Platforms: Facebook, Twitter, Instagram, TikTok, YouTube, WhatsApp
+Features: OAuth connections, manual links, browser extensions, sharing tools
+
+===========================================
