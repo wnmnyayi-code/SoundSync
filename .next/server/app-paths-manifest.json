@@ -1,0 +1,14 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/auth/register/route": "app/api/auth/register/route.js",
+  "/api/coins/route": "app/api/coins/route.js",
+  "/api/live/route": "app/api/live/route.js",
+  "/api/live/[id]/rsvp/route": "app/api/live/[id]/rsvp/route.js",
+  "/api/products/route": "app/api/products/route.js",
+  "/api/tracks/route": "app/api/tracks/route.js",
+  "/api/withdrawals/route": "app/api/withdrawals/route.js",
+  "/(auth)/signin/page": "app/(auth)/signin/page.js",
+  "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/page": "app/page.js"
+}

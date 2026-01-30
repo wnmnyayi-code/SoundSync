@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundSync - Full Platform Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'hsl(270, 20%, 8%)',
+                        foreground: 'hsl(270, 10%, 98%)',
+                        card: 'hsl(270, 25%, 12%)',
+                        primary: 'hsl(270, 70%, 60%)',
+                        accent: 'hsl(290, 80%, 65%)',
+                        muted: 'hsl(270, 10%, 65%)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, hsl(270 25% 12%), hsl(270 20% 8%));
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, hsl(270 70% 60% / 0.15), transparent 50%),
+                radial-gradient(circle at 80% 80%, hsl(290 80% 65% / 0.15), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, hsl(270 70% 60%), hsl(290 80% 65%));
+        }
+        
+        .shadow-glow {
+            box-shadow: 0 0 40px hsl(270 70% 60% / 0.3);
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pulse-live {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .role-artist { background: linear-gradient(135deg, hsl(270 70% 60%), hsl(320 70% 60%)); }
+        .role-fan { background: linear-gradient(135deg, hsl(210 70% 60%), hsl(180 70% 60%)); }
+        .role-merchant { background: linear-gradient(135deg, hsl(140 60% 50%), hsl(160 60% 50%)); }
+        .role-influencer { background: linear-gradient(135deg, hsl(30 80% 60%), hsl(0 70% 55%)); }
+        
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: hsl(270 20% 8%); }
+        ::-webkit-scrollbar-thumb { background: hsl(270 70% 60%); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(290 80% 65%); }
+        
+        .tab-active {
+            background: linear-gradient(135deg, hsl(270 70% 60%), hsl(290 80% 65%));
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icon Components
+        const Music = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+        );
+
+        const Users = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        );
+
+        const ShoppingBag = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+        );
+
+        const TrendingUp = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+        );
+
+        const Radio = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="2" strokeWidth={2} />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.24 7.76a6 6 0 010 8.49M19.07 4.93a10 10 0 010 14.14M7.76 16.24a6 6 0 010-8.49M4.93 19.07a10 10 0 010-14.14" />
+            </svg>
+        );
+
+        const Coins = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" strokeWidth={2} />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 9h-6M12 15V9" />
+            </svg>
+        );
+
+        const Upload = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+        );
+
+        const BarChart = () => (
+            <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+        );
+
+        const Play = () => (
+            <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+        );
+
+        const Heart = ({ filled }) => (
+            <svg className="w-full h-full" fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+        );
+
+        // Main App Component
+        function SoundSyncApp() {
+            const [activeTab, setActiveTab] = useState('home');
+            const [userRole, setUserRole] = useState(null);
+            const [coinBalance, setCoinBalance] = useState(500);
+            const [selectedTrack, setSelectedTrack] = useState(null);
+
+            // Mock data
+            const tracks = [
+                { id: 1, title: 'Sunset Dreams', artist: 'DJ Pulse', genre: 'Electronic', bpm: 128, price: 50, plays: 1234, likes: 89 },
+                { id: 2, title: 'Midnight Groove', artist: 'Soul Sister', genre: 'R&B', bpm: 95, price: 0, plays: 5678, likes: 234 },
+                { id: 3, title: 'Urban Nights', artist: 'Beat Master', genre: 'Hip Hop', bpm: 140, price: 100, plays: 3456, likes: 156 },
+                { id: 4, title: 'Summer Vibes', artist: 'Wave Rider', genre: 'Afrobeat', bpm: 115, price: 75, plays: 2890, likes: 198 },
+            ];
+
+            const liveParties = [
+                { id: 1, title: 'Late Night Sessions', artist: 'DJ Pulse', time: 'Tonight 10 PM', attendees: 45, rsvp: 20, status: 'upcoming' },
+                { id: 2, title: 'Exclusive Album Preview', artist: 'Soul Sister', time: 'Live Now', attendees: 123, rsvp: 50, status: 'live' },
+                { id: 3, title: 'Producer Masterclass', artist: 'Beat Master', time: 'Tomorrow 8 PM', attendees: 78, rsvp: 30, status: 'upcoming' },
+            ];
+
+            const products = [
+                { id: 1, name: 'MIDI Controller Pro', category: 'Equipment', price: 200, image: '🎹', merchant: 'Tech Store' },
+                { id: 2, name: 'VST Plugin Bundle', category: 'Software', price: 150, image: '🎛️', merchant: 'Digital Shop' },
+                { id: 3, name: 'Studio Monitors', category: 'Equipment', price: 500, image: '🔊', merchant: 'Audio Gear' },
+                { id: 4, name: 'Sample Pack Vol.1', category: 'Samples', price: 50, image: '📀', merchant: 'Sound Library' },
+            ];
+
+            return (
+                <div className="relative z-10">
+                    {/* Navigation */}
+                    <nav className="sticky top-0 z-50 glass border-b border-white/10">
+                        <div className="container mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="text-2xl font-bold">
+                                    <span className="gradient-primary bg-clip-text text-transparent">SoundSync</span>
+                                </div>
+                                
+                                <div className="hidden md:flex gap-6 items-center">
+                                    <button onClick={() => setActiveTab('home')} className={`px-4 py-2 rounded-lg transition ${activeTab === 'home' ? 'tab-active' : 'hover:bg-white/5'}`}>
+                                        Home
+                                    </button>
+                                    <button onClick={() => setActiveTab('explore')} className={`px-4 py-2 rounded-lg transition ${activeTab === 'explore' ? 'tab-active' : 'hover:bg-white/5'}`}>
+                                        Explore
+                                    </button>
+                                    <button onClick={() => setActiveTab('live')} className={`px-4 py-2 rounded-lg transition ${activeTab === 'live' ? 'tab-active' : 'hover:bg-white/5'}`}>
+                                        Live
+                                    </button>
+                                    <button onClick={() => setActiveTab('marketplace')} className={`px-4 py-2 rounded-lg transition ${activeTab === 'marketplace' ? 'tab-active' : 'hover:bg-white/5'}`}>
+                                        Marketplace
+                                    </button>
+                                </div>
+                                
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg glass">
+                                        <Coins className="w-5 h-5 text-yellow-400" />
+                                        <span className="font-semibold">{coinBalance}</span>
+                                    </div>
+                                    <button className="gradient-primary px-6 py-2 rounded-lg font-semibold shadow-glow hover:opacity-90 transition">
+                                        {userRole ? 'Dashboard' : 'Sign In'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Main Content */}
+                    <main className="container mx-auto px-4 py-8">
+                        {activeTab === 'home' && <HomePage setActiveTab={setActiveTab} />}
+                        {activeTab === 'explore' && <ExplorePage tracks={tracks} coinBalance={coinBalance} setCoinBalance={setCoinBalance} />}
+                        {activeTab === 'live' && <LivePage parties={liveParties} coinBalance={coinBalance} setCoinBalance={setCoinBalance} />}
+                        {activeTab === 'marketplace' && <MarketplacePage products={products} coinBalance={coinBalance} setCoinBalance={setCoinBalance} />}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-20 border-t border-white/10 py-12">
+                        <div className="container mx-auto px-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4 gradient-primary bg-clip-text text-transparent">SoundSync</h3>
+                                    <p className="text-gray-400">Empowering artists, connecting fans</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-3">Platform</h4>
+                                    <ul className="space-y-2 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition">For Artists</a></li>
+                                        <li><a href="#" className="hover:text-white transition">For Fans</a></li>
+                                        <li><a href="#" className="hover:text-white transition">For Merchants</a></li>
+                                        <li><a href="#" className="hover:text-white transition">For Influencers</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-3">Resources</h4>
+                                    <ul className="space-y-2 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition">Documentation</a></li>
+                                        <li><a href="#" className="hover:text-white transition">Help Center</a></li>
+                                        <li><a href="#" className="hover:text-white transition">API</a></li>
+                                        <li><a href="#" className="hover:text-white transition">Blog</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-3">Legal</h4>
+                                    <ul className="space-y-2 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+                                        <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
+                                        <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="mt-8 pt-8 border-t border-white/10 text-center text-gray-400">
+                                <p>© 2025 SoundSync. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        // Home Page Component
+        function HomePage({ setActiveTab }) {
+            return (
+                <div className="space-y-20">
+                    {/* Hero Section */}
+                    <section className="text-center py-20 animate-fade-in">
+                        <h1 className="text-5xl md:text-7xl font-black mb-6 gradient-primary bg-clip-text text-transparent">
+                            Empower Your Music Journey
+                        </h1>
+                        <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                            Upload tracks, host live listening parties, connect with fans, and monetize your creativity
+                        </p>
+                        <div className="flex gap-4 justify-center flex-wrap">
+                            <button className="gradient-primary px-8 py-4 rounded-lg font-semibold shadow-glow hover:opacity-90 transition text-lg">
+                                Get Started Free
+                            </button>
+                            <button onClick={() => setActiveTab('explore')} className="border-2 border-white/20 px-8 py-4 rounded-lg font-semibold hover:bg-white/5 transition text-lg">
+                                Explore Music
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* Four Roles */}
+                    <section>
+                        <div className="text-center mb-12">
+                            <h2 className="text-4xl font-bold mb-4">Four Ways to Thrive</h2>
+                            <p className="text-xl text-gray-400">Choose your path or combine roles to maximize earnings</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <RoleCard 
+                                icon={<Music />}
+                                title="Artist"
+                                description="Upload music, host sessions, earn 60% revenue"
+                                colorClass="role-artist"
+                                features={['Upload MP3/WAV/FLAC', 'Live parties', 'Analytics']}
+                            />
+                            <RoleCard 
+                                icon={<Users />}
+                                title="Fan"
+                                description="Stream music, attend parties, support artists"
+                                colorClass="role-fan"
+                                features={['Unlimited streaming', 'Exclusive sessions', 'Direct tipping']}
+                            />
+                            <RoleCard 
+                                icon={<ShoppingBag />}
+                                title="Merchant"
+                                description="Sell products, keep 90% of sales"
+                                colorClass="role-merchant"
+                                features={['Physical products', 'Digital downloads', 'Sales tracking']}
+                            />
+                            <RoleCard 
+                                icon={<TrendingUp />}
+                                title="Influencer"
+                                description="Promote artists, earn 10% commission"
+                                colorClass="role-influencer"
+                                features={['Referral links', 'Commission tracking', 'Performance bonuses']}
+                            />
+                        </div>
+                    </section>
+
+                    {/* Coin Economy */}
+                    <section className="bg-white/5 rounded-3xl p-12">
+                        <div className="text-center mb-12">
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-primary mb-6 shadow-glow">
+                                <Coins className="w-10 h-10" />
+                            </div>
+                            <h2 className="text-4xl font-bold mb-4">Simple Coin Economy</h2>
+                            <p className="text-xl text-gray-400">Buy coins once, use for tips, RSVPs, and purchases</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                            <CoinPackage amount="R10" coins="200" rate="R0.05/coin" />
+                            <CoinPackage amount="R25" coins="500" rate="R0.05/coin" popular />
+                            <CoinPackage amount="R50" coins="1000" rate="R0.05/coin" />
+                        </div>
+                    </section>
+                </div>
+            );
+        }
+
+        // Explore Page Component
+        function ExplorePage({ tracks, coinBalance, setCoinBalance }) {
+            const [likedTracks, setLikedTracks] = useState(new Set());
+
+            const handleLike = (trackId) => {
+                setLikedTracks(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(trackId)) {
+                        newSet.delete(trackId);
+                    } else {
+                        newSet.add(trackId);
+                    }
+                    return newSet;
+                });
+            };
+
+            const handlePurchase = (price) => {
+                if (coinBalance >= price) {
+                    setCoinBalance(prev => prev - price);
+                    alert('Track purchased! Download starting...');
+                } else {
+                    alert('Insufficient coins. Please buy more coins.');
+                }
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="text-center">
+                        <h1 className="text-5xl font-bold mb-4 gradient-primary bg-clip-text text-transparent">Explore Music</h1>
+                        <p className="text-xl text-gray-400">Discover new tracks from talented artists</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {tracks.map(track => (
+                            <TrackCard 
+                                key={track.id}
+                                track={track}
+                                liked={likedTracks.has(track.id)}
+                                onLike={() => handleLike(track.id)}
+                                onPurchase={() => handlePurchase(track.price)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Live Page Component
+        function LivePage({ parties, coinBalance, setCoinBalance }) {
+            const handleRSVP = (price) => {
+                if (coinBalance >= price) {
+                    setCoinBalance(prev => prev - price);
+                    alert('RSVP confirmed! You will receive a reminder before the session.');
+                } else {
+                    alert('Insufficient coins. Please buy more coins.');
+                }
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="text-center">
+                        <h1 className="text-5xl font-bold mb-4 gradient-primary bg-clip-text text-transparent">Live Sessions</h1>
+                        <p className="text-xl text-gray-400">Join exclusive listening parties and connect with artists</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {parties.map(party => (
+                            <LivePartyCard 
+                                key={party.id}
+                                party={party}
+                                onRSVP={() => handleRSVP(party.rsvp)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Marketplace Page Component
+        function MarketplacePage({ products, coinBalance, setCoinBalance }) {
+            const handlePurchase = (price, name) => {
+                if (coinBalance >= price) {
+                    setCoinBalance(prev => prev - price);
+                    alert(`${name} purchased successfully!`);
+                } else {
+                    alert('Insufficient coins. Please buy more coins.');
+                }
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="text-center">
+                        <h1 className="text-5xl font-bold mb-4 gradient-primary bg-clip-text text-transparent">Marketplace</h1>
+                        <p className="text-xl text-gray-400">Find the best equipment and digital products</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {products.map(product => (
+                            <ProductCard 
+                                key={product.id}
+                                product={product}
+                                onPurchase={() => handlePurchase(product.price, product.name)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Sub-components
+        function RoleCard({ icon, title, description, colorClass, features }) {
+            return (
+                <div className="glass rounded-2xl p-6 hover:shadow-glow transition-all">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-glow ${colorClass}`}>
+                        {icon}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">{title}</h3>
+                    <p className="text-gray-400 mb-4">{description}</p>
+                    <ul className="space-y-2">
+                        {features.map((feature, i) => (
+                            <li key={i} className="text-sm text-gray-400 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                {feature}
+                            </li>
+                        ))}
+                    </ul>
+                    <button className={`w-full mt-6 py-2 rounded-lg font-semibold hover:opacity-90 transition ${colorClass}`}>
+                        Get Started
+                    </button>
+                </div>
+            );
+        }
+
+        function CoinPackage({ amount, coins, rate, popular }) {
+            return (
+                <div className={`glass rounded-2xl p-6 relative ${popular ? 'border-2 border-primary shadow-glow' : ''}`}>
+                    {popular && (
+                        <div className="absolute top-4 right-4 bg-primary text-white text-xs px-3 py-1 rounded-full font-semibold">
+                            Popular
+                        </div>
+                    )}
+                    <div className="text-center">
+                        <div className="text-3xl font-bold text-primary mb-2">{amount}</div>
+                        <div className="text-4xl font-black mb-2">{coins} coins</div>
+                        <div className="text-sm text-gray-400">{rate}</div>
+                        <button className="w-full mt-6 gradient-primary py-3 rounded-lg font-semibold shadow-glow hover:opacity-90 transition">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function TrackCard({ track, liked, onLike, onPurchase }) {
+            return (
+                <div className="glass rounded-2xl p-6 hover:shadow-glow transition-all">
+                    <div className="flex items-start gap-4">
+                        <div className="w-20 h-20 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Music className="w-10 h-10" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-xl font-bold mb-1">{track.title}</h3>
+                            <p className="text-gray-400 text-sm mb-2">{track.artist}</p>
+                            <div className="flex gap-4 text-sm text-gray-400">
+                                <span>{track.genre}</span>
+                                <span>{track.bpm} BPM</span>
+                            </div>
+                        </div>
+                        <button onClick={onLike} className="text-pink-500 hover:scale-110 transition">
+                            <Heart filled={liked} className="w-6 h-6" />
+                        </button>
+                    </div>
+                    
+                    <div className="mt-4 flex items-center justify-between">
+                        <div className="flex gap-4 text-sm text-gray-400">
+                            <span>▶ {track.plays.toLocaleString()}</span>
+                            <span>♥ {track.likes}</span>
+                        </div>
+                        {track.price > 0 ? (
+                            <button onClick={onPurchase} className="gradient-primary px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                                {track.price} coins
+                            </button>
+                        ) : (
+                            <button className="border border-white/20 px-6 py-2 rounded-lg font-semibold hover:bg-white/5 transition">
+                                Free
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function LivePartyCard({ party, onRSVP }) {
+            return (
+                <div className="glass rounded-2xl p-6 hover:shadow-glow transition-all">
+                    {party.status === 'live' && (
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-3 h-3 rounded-full bg-red-500 pulse-live"></div>
+                            <span className="text-red-500 font-semibold text-sm">LIVE NOW</span>
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center">
+                            <Radio className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold">{party.title}</h3>
+                            <p className="text-sm text-gray-400">{party.artist}</p>
+                        </div>
+                    </div>
+                    
+                    <p className="text-gray-400 text-sm mb-4">{party.time}</p>
+                    
+                    <div className="flex items-center justify-between mb-4 text-sm text-gray-400">
+                        <span>{party.attendees} attending</span>
+                        <span>{party.rsvp} coins to RSVP</span>
+                    </div>
+                    
+                    <button onClick={onRSVP} className={`w-full py-2 rounded-lg font-semibold hover:opacity-90 transition ${party.status === 'live' ? 'bg-red-500' : 'gradient-primary'}`}>
+                        {party.status === 'live' ? 'Join Now' : 'RSVP'}
+                    </button>
+                </div>
+            );
+        }
+
+        function ProductCard({ product, onPurchase }) {
+            return (
+                <div className="glass rounded-2xl p-6 hover:shadow-glow transition-all">
+                    <div className="text-6xl mb-4 text-center">{product.image}</div>
+                    <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+                    <p className="text-sm text-gray-400 mb-1">{product.category}</p>
+                    <p className="text-xs text-gray-500 mb-4">by {product.merchant}</p>
+                    
+                    <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
+                            {product.price} coins
+                        </span>
+                        <button onClick={onPurchase} className="gradient-primary px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                            Buy
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render App
+        ReactDOM.render(<SoundSyncApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

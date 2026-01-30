@@ -1,0 +1,426 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")        // pooler (runtime)
+  directUrl = env("DIRECT_DATABASE_URL") // direct (schema ops)
+}
+
+}
+
+// User and Authentication
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  name          String?
+  image         String?
+  phoneNumber   String?
+  phoneVerified Boolean   @default(false)
+  
+  // Subscription
+  subscriptionTier String @default("BASIC") // BASIC, STANDARD, PREMIUM
+  subscriptionStatus String @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED
+  subscriptionEndsAt DateTime?
+  
+  // Roles - users can have multiple roles based on subscription
+  roles         UserRole[]
+  
+  // Financial
+  coinBalance   Int       @default(0)
+  
+  // Profile
+  bio           String?
+  location      String?
+  artistStatus  String?   // Independent, Signed, Registered
+  sambroNumber  String?
+  sarsNumber    String?
+  businessName  String?
+  
+  // Social Media
+  socialLinks   SocialLink[]
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  tracks        Track[]
+  playlists     Playlist[]
+  transactions  Transaction[]
+  withdrawals   Withdrawal[]
+  liveParties   LiveParty[]
+  rsvps         RSVP[]
+  products      Product[]
+  orders        Order[]
+  referrals     Referral[]
+  earnings      Earning[]
+  followers     Follow[]     @relation("Followers")
+  following     Follow[]     @relation("Following")
+  tips          Tip[]
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // ARTIST, FAN, MERCHANT, INFLUENCER
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Social Media Integration
+model SocialLink {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform  String   // FACEBOOK, TWITTER, INSTAGRAM, TIKTOK, YOUTUBE, WHATSAPP
+  url       String
+  username  String?
+  isVerified Boolean @default(false)
+  followers Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, platform])
+}
+
+// Music and Content
+model Track {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title           String
+  artist          String
+  genre           String?
+  bpm             Int?
+  key             String?
+  duration        Int?      // in seconds
+  
+  // File information
+  originalFile    String    // S3 key
+  processedFile   String?   // S3 key for processed file
+  coverArt        String?   // S3 key
+  fileSize        Int?
+  format          String    // MP3, WAV, FLAC
+  
+  // Audio settings
+  targetLUFS      Float     @default(-14)
+  masteringPreset String    @default("MODERATE") // GENTLE, MODERATE, AGGRESSIVE
+  normalization   Boolean   @default(true)
+  mastering       Boolean   @default(true)
+  outputFormat    String    @default("MP3") // MP3, FLAC
+  
+  // Visibility and pricing
+  isPublic        Boolean   @default(true)
+  isDRMProtected  Boolean   @default(false)
+  price           Int       @default(0) // in coins
+  
+  // Stats
+  playCount       Int       @default(0)
+  downloadCount   Int       @default(0)
+  likeCount       Int       @default(0)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  playlistTracks  PlaylistTrack[]
+  transactions    Transaction[]
+}
+
+model Playlist {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  coverImage  String?
+  isPublic    Boolean   @default(true)
+  
+  // Stats
+  followCount Int       @default(0)
+  playCount   Int       @default(0)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  tracks      PlaylistTrack[]
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  position   Int
+  addedAt    DateTime @default(now())
+  
+  @@unique([playlistId, trackId])
+}
+
+// Live Listening Parties
+model LiveParty {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title         String
+  description   String?
+  scheduledAt   DateTime
+  startedAt     DateTime?
+  endedAt       DateTime?
+  
+  rsvpPrice     Int       @default(0) // in coins
+  maxAttendees  Int?
+  
+  status        String    @default("SCHEDULED") // SCHEDULED, LIVE, ENDED, CANCELLED
+  
+  // Stats
+  attendeeCount Int       @default(0)
+  totalTips     Int       @default(0)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  rsvps         RSVP[]
+  tips          Tip[]
+}
+
+model RSVP {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  partyId     String
+  party       LiveParty @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  
+  paidAmount  Int       // in coins
+  attended    Boolean   @default(false)
+  
+  createdAt   DateTime  @default(now())
+  
+  @@unique([userId, partyId])
+}
+
+model Tip {
+  id          String    @id @default(cuid())
+  fromUserId  String
+  fromUser    User      @relation(fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String?   // Can tip artists or during live parties
+  partyId     String?
+  party       LiveParty? @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  
+  amount      Int       // in coins
+  message     String?
+  
+  createdAt   DateTime  @default(now())
+}
+
+// Marketplace
+model Product {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name          String
+  description   String
+  category      String
+  type          String    // PHYSICAL, DIGITAL
+  
+  price         Int       // in coins
+  images        String[]  // Array of S3 keys
+  
+  // Physical product details
+  deliveryRadius Int?     // in km
+  stock         Int?
+  
+  // Digital product details
+  downloadUrl   String?   // S3 key
+  
+  isActive      Boolean   @default(true)
+  
+  // Stats
+  views         Int       @default(0)
+  sales         Int       @default(0)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  orders        OrderItem[]
+}
+
+model Order {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  orderNumber   String    @unique
+  status        String    @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  
+  totalAmount   Int       // in coins
+  
+  // Shipping details
+  shippingAddress String?
+  trackingNumber  String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  quantity    Int
+  price       Int     // Price at time of purchase
+}
+
+// Financial System
+model Transaction {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String    // COIN_PURCHASE, TIP, RSVP, TRACK_PURCHASE, PRODUCT_PURCHASE, WITHDRAWAL
+  amount          Int       // in coins
+  amountZAR       Float?    // in ZAR
+  
+  status          String    @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  
+  // Payment details
+  stripePaymentId String?
+  
+  // Related entities
+  trackId         String?
+  track           Track?    @relation(fields: [trackId], references: [id])
+  
+  description     String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Earning {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            String    // STREAM, SALE, TIP, COMMISSION, PRODUCT_SALE
+  amount          Float     // in ZAR
+  
+  source          String?   // Transaction or referral source
+  
+  status          String    @default("PENDING") // PENDING, AVAILABLE, WITHDRAWN
+  
+  createdAt       DateTime  @default(now())
+}
+
+model Withdrawal {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount          Float     // in ZAR
+  status          String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  
+  // Bank details
+  bankName        String
+  accountNumber   String
+  accountHolder   String
+  
+  processedAt     DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Influencer System
+model Referral {
+  id              String    @id @default(cuid())
+  influencerId    String
+  influencer      User      @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  
+  code            String    @unique
+  type            String    // ARTIST, PRODUCT
+  
+  targetId        String?   // Artist ID or Product ID
+  
+  // Stats
+  clicks          Int       @default(0)
+  conversions     Int       @default(0)
+  totalEarnings   Float     @default(0)
+  
+  isActive        Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Social Features
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([followerId, followingId])
+}
