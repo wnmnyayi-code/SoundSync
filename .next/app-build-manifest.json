@@ -39,19 +39,19 @@
       "static/chunks/main-app-bd0ab0ebdfa96aa3.js",
       "static/chunks/app/api/coins/route-00a0edb91cd3f169.js"
     ],
-    "/api/live/route": [
-      "static/chunks/webpack-54edc5da07044344.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-35bf8c00c5dde345.js",
-      "static/chunks/main-app-bd0ab0ebdfa96aa3.js",
-      "static/chunks/app/api/live/route-00a0edb91cd3f169.js"
-    ],
     "/api/live/[id]/rsvp/route": [
       "static/chunks/webpack-54edc5da07044344.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
       "static/chunks/255-35bf8c00c5dde345.js",
       "static/chunks/main-app-bd0ab0ebdfa96aa3.js",
       "static/chunks/app/api/live/[id]/rsvp/route-00a0edb91cd3f169.js"
+    ],
+    "/api/live/route": [
+      "static/chunks/webpack-54edc5da07044344.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-35bf8c00c5dde345.js",
+      "static/chunks/main-app-bd0ab0ebdfa96aa3.js",
+      "static/chunks/app/api/live/route-00a0edb91cd3f169.js"
     ],
     "/api/products/route": [
       "static/chunks/webpack-54edc5da07044344.js",

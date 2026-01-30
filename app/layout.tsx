@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
@@ -11,6 +11,13 @@ const inter = Inter({
   weight: ['400', '500', '600', '700', '900'],
   variable: '--font-inter',
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#9333ea',
+}
 
 export const metadata: Metadata = {
   title: 'SoundSync - Empowering Artists, Connecting Fans',
@@ -28,12 +35,6 @@ export const metadata: Metadata = {
     title: 'SoundSync',
     description: 'Empowering Artists, Connecting Fans',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
-  themeColor: '#9333ea',
 }
 
 export default function RootLayout({
